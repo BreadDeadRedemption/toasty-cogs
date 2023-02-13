@@ -4,7 +4,7 @@ import asyncio
 from typing import Dict, List, Tuple
 from discord import User
 
-class Scattergories(commands.Cog):
+class ScattergoriesCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.categories = [
