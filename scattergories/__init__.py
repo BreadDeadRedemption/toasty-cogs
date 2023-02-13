@@ -1,3 +1,5 @@
+from discord.ext import commands
+
 class Scattergories(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -33,3 +35,6 @@ class Scattergories(commands.Cog):
         self.current_letter = None
         self.round_timer = None
         self.voting_time = 60
+
+def setup(bot):
+    bot.add_cog(Scattergories(bot))
