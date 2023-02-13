@@ -1,4 +1,4 @@
-from .scattergories import Scattergories
+from .scattergories_cog import ScattergoriesCog
 
 def setup(bot):
-    bot.add_cog(Scattergories(bot))
+    bot.add_cog(ScattergoriesCog(bot))
