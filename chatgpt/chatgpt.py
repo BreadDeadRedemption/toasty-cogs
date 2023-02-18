@@ -7,7 +7,7 @@ class ChatGPT(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1234567890)
-        self.config.register_global(chatgpt_api_key=None)
+        self.config.register_guild(chatgpt_api_key=None)
         self.api_key = None
         self.channel_id = None
         self.starting_prompt = None
@@ -17,8 +17,7 @@ class ChatGPT(commands.Cog):
         self.bot.loop.create_task(self.load_api_key())
 
     async def load_api_key(self):
-        self.api_key = await self.config.chatgpt_api_key()
-
+        self.api_key = await self.config.guild(self.bot.guilds[0]).chatgpt_api_key()
 
     async def _get_response(self, prompt, temperature):
         response = openai.Completion.create(
@@ -44,9 +43,10 @@ class ChatGPT(commands.Cog):
         pass
 
     @chatgpt.command()
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
     async def setapikey(self, ctx, api_key):
-        self.api_key = api_key
-        await self.config.chatgpt_api_key.set(api_key)
+        await self.config.guild(ctx.guild).chatgpt_api_key.set(api_key)
         await ctx.send("OpenAI API key set")
 
     @chatgpt.command()
