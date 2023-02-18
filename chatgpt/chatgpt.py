@@ -74,15 +74,17 @@ class ChatGPT(commands.Cog):
 
     @chatgpt.command()
     async def chat(self, ctx, privacy="public"):
-        self.api_key = await self.config.chatgpt_api_key()
+        settings = await self.config.all()
+        self.api_key = settings['chatgpt_api_key']
 
-        if self.api_key is None:
-            await ctx.send("API key must be set before chatting")
-            return
+    if self.api_key is None:
+        await ctx.send("API key must be set before chatting")
+        return
 
-        if self.channel_id is not None and ctx.channel.id != self.channel_id:
-            await ctx.send("This command can only be used in the designated chat channel")
-            return
+    if self.channel_id is not None and ctx.channel.id != self.channel_id:
+        await ctx.send("This command can only be used in the designated chat channel")
+        return
+
 
         if privacy == "private":
             thread = await ctx.author.create_dm()
