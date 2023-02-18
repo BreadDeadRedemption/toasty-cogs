@@ -16,8 +16,10 @@ class ChatGPT(commands.Cog):
         # Load the API key from the config file
         self.bot.loop.create_task(self.load_api_key())
 
-    async def load_api_key(self):
-        self.api_key = await self.config.guild(self.bot.guilds[0]).chatgpt_api_key()
+  async def load_api_key(self):
+    api_key = await self.config.guild(self.bot.guilds[0]).chatgpt_api_key()
+    if api_key:
+        self.api_key = api_key
 
     async def _get_response(self, prompt, temperature):
         response = openai.Completion.create(
