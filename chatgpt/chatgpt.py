@@ -76,6 +76,7 @@ class ChatGPT(commands.Cog):
     @chatgpt.command()
     @commands.guild_only()
     async def chat(self, ctx, privacy="public"):
+        guild = ctx.guild
         api_key = await self._get_api_key(ctx.guild)
         if api_key is None:
             await ctx.send("API key must be set before chatting")
