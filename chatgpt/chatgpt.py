@@ -77,13 +77,13 @@ class ChatGPT(commands.Cog):
         settings = await self.config.all()
         self.api_key = settings['chatgpt_api_key']
 
-    if self.api_key is None:
-        await ctx.send("API key must be set before chatting")
-        return
+        if self.api_key is None:
+            await ctx.send("API key must be set before chatting")
+            return
 
-    if self.channel_id is not None and ctx.channel.id != self.channel_id:
-        await ctx.send("This command can only be used in the designated chat channel")
-        return
+        if self.channel_id is not None and ctx.channel.id != self.channel_id:
+            await ctx.send("This command can only be used in the designated chat channel")
+            return
 
 
         if privacy == "private":
