@@ -1,11 +1,11 @@
 import discord
-from redbot.core import commands, checks, data_manager
+from redbot.core import commands, checks
 import openai
 
 class ChatGPT(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.api_key = data_manager.get_global("chatgpt_api_key", default=None)
+        self.api_key = self.bot.config.chatgpt_api_key()
         self.model_name = "davinci"
         self.channel_id = None
 
@@ -28,7 +28,7 @@ class ChatGPT(commands.Cog):
     @commands.command()
     async def setapikey(self, ctx, api_key):
         self.api_key = api_key
-        data_manager.set_global("chatgpt_api_key", self.api_key)
+        await self.bot.config.chatgpt_api_key.set(api_key)
         await ctx.send("OpenAI API key set")
 
     @commands.command()
@@ -89,7 +89,3 @@ class ChatGPT(commands.Cog):
     async def endchat(self, ctx):
         await ctx.send("You are not currently in a chat session")
 
-    @checks.is_owner()
-    @commands.command()
-    async def clearsettings(self, ctx):
-        self
