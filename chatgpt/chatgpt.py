@@ -12,7 +12,13 @@ class ChatGPT(commands.Cog):
         self.channel_id = None
         self.starting_prompt = None
         self.model_name = "davinci-3"
-        openai.api_key = self.api_key
+
+        # Load the API key from the config file
+        self.bot.loop.create_task(self.load_api_key())
+
+    async def load_api_key(self):
+        self.api_key = await self.config.chatgpt_api_key()
+
 
     async def _get_response(self, prompt, temperature):
         response = openai.Completion.create(
