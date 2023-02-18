@@ -13,15 +13,13 @@ class ChatGPT(commands.Cog):
         self.starting_prompt = None
         self.model_name = "davinci-3"
 
-        # Load the API key from the config file
-        self.bot.loop.create_task(self.load_api_key())
+    async def _get_api_key(self, guild):
+        api_key = await self.config.guild(guild).chatgpt_api_key()
+        return api_key
 
-    async def load_api_key(self):
-        api_key = await self.config.guild(self.bot.guilds[0]).chatgpt_api_key()
-        if api_key:
-            self.api_key = api_key
-
-    async def _get_response(self, prompt, temperature):
+    async def _get_response(self, prompt, temperature, guild):
+        api_key = await self._get_api_key(guild)
+        openai.api_key = api_key
         response = openai.Completion.create(
             engine=self.model_name,
             prompt=prompt,
@@ -52,6 +50,7 @@ class ChatGPT(commands.Cog):
         await ctx.send("OpenAI API key set")
 
     @chatgpt.command()
+    @commands.guild_only()
     async def setchannelid(self, ctx, channel):
         if channel.startswith("<#") and channel.endswith(">"):
             channel = channel[2:-1]
@@ -75,18 +74,16 @@ class ChatGPT(commands.Cog):
         await ctx.send("Starting prompt set")
 
     @chatgpt.command()
+    @commands.guild_only()
     async def chat(self, ctx, privacy="public"):
-        settings = await self.config.all()
-        self.api_key = settings['chatgpt_api_key']
-
-        if self.api_key is None:
+        api_key = await self._get_api_key(ctx.guild)
+        if api_key is None:
             await ctx.send("API key must be set before chatting")
             return
 
         if self.channel_id is not None and ctx.channel.id != self.channel_id:
             await ctx.send("This command can only be used in the designated chat channel")
             return
-
 
         if privacy == "private":
             thread = await ctx.author.create_dm()
