@@ -1,13 +1,15 @@
 import discord
-from redbot.core import commands, checks
+from redbot.core import commands, Config
 import openai
 
 class ChatGPT(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.api_key = self.bot.config.chatgpt_api_key()
-        self.model_name = "davinci"
+        self.api_key = None
+        self.model_name = "davinci-3"
         self.channel_id = None
+        self.starting_prompt = None
+        self.config = Config.get_conf(self, identifier=1234567890)
 
     async def _get_response(self, message_content, temperature):
         if self.api_key is None:
@@ -26,31 +28,38 @@ class ChatGPT(commands.Cog):
         return response_text
 
     @commands.command()
-    async def setapikey(self, ctx, api_key):
+    async def chatgpt_setapikey(self, ctx, api_key):
         self.api_key = api_key
-        await self.bot.config.chatgpt_api_key.set(api_key)
+        await self.config.chatgpt_api_key.set(api_key)
         await ctx.send("OpenAI API key set")
 
     @commands.command()
-    async def setchannelid(self, ctx, channel):
+    async def chatgpt_setchannelid(self, ctx, channel):
         if channel.startswith("<#") and channel.endswith(">"):
             channel = channel[2:-1]
 
-        try:
-            self.channel_id = int(channel)
-        except ValueError:
+        channel_id = None
+        for ch in ctx.guild.channels:
+            if ch.id == int(channel) or ch.name == channel:
+                channel_id = ch.id
+                break
+
+        if channel_id is None:
             await ctx.send("Invalid channel ID or mention")
             return
 
-        await ctx.send(f"Channel ID set to {channel}")
+        self.channel_id = channel_id
+        await ctx.send(f"Channel ID set to {channel_id}")
 
     @commands.command()
-    async def setstartingprompt(self, ctx, starting_prompt):
+    async def chatgpt_setstartingprompt(self, ctx, starting_prompt):
         self.starting_prompt = starting_prompt
         await ctx.send("Starting prompt set")
 
     @commands.command()
-    async def chat(self, ctx, privacy="public"):
+    async def chatgpt_chat(self, ctx, privacy="public"):
+        self.api_key = await self.config.chatgpt_api_key()
+
         if self.api_key is None:
             await ctx.send("API key must be set before chatting")
             return
@@ -82,10 +91,4 @@ class ChatGPT(commands.Cog):
             if message.content == "chatgpt endchat":
                 await thread.send("Conversation ended")
                 return
-            response_text = await self._get_response(prompt + message.content, temperature)
-            await thread.send(response_text)
-
-    @commands.command()
-    async def endchat(self, ctx):
-        await ctx.send("You are not currently in a chat session")
-
+            response_text = await self._get_response
