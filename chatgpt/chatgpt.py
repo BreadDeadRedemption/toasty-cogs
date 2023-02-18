@@ -28,7 +28,7 @@ class ChatGPT(commands.Cog):
             stop=None,
             temperature=temperature,
         )
-        response_text = response.choices[0].text
+        response_text = await self._get_response(prompt, temperature, ctx.guild)
         return response_text
 
     @commands.command()
