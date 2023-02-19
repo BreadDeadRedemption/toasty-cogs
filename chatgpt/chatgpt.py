@@ -11,7 +11,7 @@ class ChatGPT(commands.Cog):
         self.api_key = None
         self.channel_id = None
         self.starting_prompt = None
-        self.model_name = "davinci-3"
+        self.model_name = 'davinci-3'
 
     async def _get_api_key(self, guild):
         api_key = await self.config.guild(guild).chatgpt_api_key()
