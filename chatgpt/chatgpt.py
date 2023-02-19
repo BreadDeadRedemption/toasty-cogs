@@ -41,15 +41,6 @@ class ChatGPT(commands.Cog):
             await ctx.send("No active chat session. Use the `chatgpt chat` command to start a new session")
             return False
         return True
-
-    @commands.command()
-    async def endchat(self, ctx):
-        self.api_key = None
-        self.channel_id = None
-        self.starting_prompt = None
-        self.chat_active = False
-        await ctx.send("ChatGPT session ended")
-        return
         
     @commands.group()
     async def chatgpt(self, ctx):
@@ -62,6 +53,15 @@ class ChatGPT(commands.Cog):
         await self.config.guild(ctx.guild).chatgpt_api_key.set(api_key)
         await ctx.send("OpenAI API key set")
 
+    @chatgpt.command()
+    @commands.guild_only()
+    async def clearchat(self, ctx):
+        self.api_key = None
+        self.channel_id = None
+        self.starting_prompt = None
+        self.chat_active = False
+        await ctx.send("ChatGPT session data cleared")
+        
     @chatgpt.command()
     @commands.guild_only()
     async def setchannelid(self, ctx, channel):
