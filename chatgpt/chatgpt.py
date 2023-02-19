@@ -79,11 +79,6 @@ class ChatGPT(commands.Cog):
         await ctx.send(f"Channel ID set to {channel_id}")
 
     @chatgpt.command()
-    async def setstartingprompt(self, ctx, starting_prompt):
-        self.starting_prompt = starting_prompt
-        await ctx.send("Starting prompt set")
-
-    @chatgpt.command()
     @commands.guild_only()
     async def chat(self, ctx, privacy="public"):
         guild = ctx.guild
