@@ -45,7 +45,8 @@ class ChatGPT(commands.Cog):
         self.starting_prompt = None
         self.chat_active = False
         await ctx.send("ChatGPT session ended")
-
+        return
+        
     @commands.group()
     async def chatgpt(self, ctx):
         pass
