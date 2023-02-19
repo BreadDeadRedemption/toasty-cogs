@@ -12,6 +12,7 @@ class ChatGPT(commands.Cog):
         self.channel_id = None
         self.starting_prompt = None
         self.model_name = "text-davinci-003"
+        self.chat_active = False
 
     async def _get_api_key(self, guild):
         api_key = await self.config.guild(guild).chatgpt_api_key()
@@ -31,12 +32,18 @@ class ChatGPT(commands.Cog):
         response_text = response.choices[0].text
         return response_text
 
+    async def chat_check(self, ctx):
+        if not self.chat_active:
+            await ctx.send("No active chat session. Use the `chatgpt chat` command to start a new session")
+            return False
+        return True
 
     @commands.command()
     async def endchat(self, ctx):
         self.api_key = None
         self.channel_id = None
         self.starting_prompt = None
+        self.chat_active = False
         await ctx.send("ChatGPT session ended")
 
     @commands.group()
