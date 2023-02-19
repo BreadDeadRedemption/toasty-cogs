@@ -28,8 +28,9 @@ class ChatGPT(commands.Cog):
             stop=None,
             temperature=temperature,
         )
-        response_text = await self._get_response(prompt, temperature, ctx.guild)
+        response_text = response.choices[0].text
         return response_text
+
 
     @commands.command()
     async def endchat(self, ctx):
@@ -109,7 +110,7 @@ class ChatGPT(commands.Cog):
             message = await self.bot.wait_for("message", check=lambda m: m.channel == thread and m.author == ctx.author)
             if message.content.lower() == "chatgpt endchat":
                 break
-            response_text = await self._get_response(prompt, temperature)
+            response_text = await self._get_response(prompt, temperature, guild)
             prompt = f"{prompt.strip()} {response_text.strip()}"
 
         return
