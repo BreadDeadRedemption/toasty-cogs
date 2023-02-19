@@ -113,11 +113,12 @@ class ChatGPT(commands.Cog):
 
         await thread.send("Conversation started. Enter `chatgpt endchat` to end the conversation")
         while True:
+            if not self.chat_active:
+                break
             await thread.send(prompt)
             message = await self.bot.wait_for("message", check=lambda m: m.channel == thread and m.author == ctx.author)
             if message.content.lower() == "chatgpt endchat":
+                self.chat_active = False
                 break
             response_text = await self._get_response(prompt, temperature, guild)
-            prompt = f"{self.starting_prompt} {response_text.strip()}"
-
-        return
+            prompt = f"{prompt.strip()} {response_text.strip()}"
