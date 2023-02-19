@@ -30,8 +30,8 @@ class ChatGPT(commands.Cog):
             temperature=temperature,
         )
         response_text = response.choices[0].text
-        response_text = response_text.replace(prompt, "")
-        return response_text.strip()
+        response_text = response_text[prompt_len:].strip()
+        return response_text
 
     async def chat_check(self, ctx):
         if not self.chat_active:
