@@ -118,6 +118,6 @@ class ChatGPT(commands.Cog):
             if message.content.lower() == "chatgpt endchat":
                 break
             response_text = await self._get_response(prompt, temperature, guild)
-            prompt = f"{prompt.strip()} {response_text.strip()}"
+            prompt = f"{self.starting_prompt} {response_text.strip()}"
 
         return
