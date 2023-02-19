@@ -21,6 +21,7 @@ class ChatGPT(commands.Cog):
     async def _get_response(self, prompt, temperature, guild):
         api_key = await self._get_api_key(guild)
         openai.api_key = api_key
+        prompt_len = len(self.starting_prompt)
         response = openai.Completion.create(
             engine=self.model_name,
             prompt=prompt,
@@ -32,6 +33,7 @@ class ChatGPT(commands.Cog):
         response_text = response.choices[0].text
         response_text = response_text[prompt_len:].strip()
         return response_text
+
 
     async def chat_check(self, ctx):
         if not self.chat_active:
