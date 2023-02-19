@@ -29,7 +29,7 @@ class ChatGPT(commands.Cog):
             stop=None,
             temperature=temperature,
         )
-        response_text = response.choices[0].text
+        response_text = response.choices[0].text.replace(prompt, '')
         return response_text
 
     async def chat_check(self, ctx):
