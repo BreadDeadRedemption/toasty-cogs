@@ -67,7 +67,7 @@ class ChatGPTCog(commands.Cog):
                     else:
                          if isReplyAll:
                             await ctx.channel.send("```" + formatted_code_block + "```")
-                        else:
+                         else:
                             await ctx.send("```" + formatted_code_block + "```")
                     # Send the remaining of the response in another message
                     if len(parts) >= 3:
