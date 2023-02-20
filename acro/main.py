@@ -170,7 +170,7 @@ class AcroCog(commands.Cog):
         submissions_output = "```"
         for i, (author_id, submission) in enumerate(self.submissions.items()):
             author = self.author_submissions[author_id]
-            if submission in [winner["submission"] for winner in self.tiebreak_win
+            if submission in [winner["submission"] for winner in self.tiebreak_winners]:
                           self.tiebreak_votes[submission] = {"votes": 0, "authors": []}
             submissions_output += f"{i + 1}. {submission} (Submitted by: {author})\n"
         submissions_output += "```"
