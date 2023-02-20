@@ -1,4 +1,4 @@
-from .main import Acro
+from .main import AcroCog
 
 
 def setup(bot):
