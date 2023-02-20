@@ -167,5 +167,3 @@ async def on_command_error(self, ctx, error):
     else:
         logger.exception("An error occurred while processing a command.")
         await ctx.send("> **Error: Something went wrong, please try again later!**")
-def setup(bot):
-bot.add_cog(ChatGPT(bot))
