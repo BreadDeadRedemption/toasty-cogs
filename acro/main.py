@@ -75,7 +75,7 @@ class AcroCog(commands.Cog):
             return
 
         self.submissions_channel = await ctx.guild.create_text_channel("acro-submissions", category=ctx.channel.category, overwrites={ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False)})
-        self.votes_channel = await ctx.guild.create_text_channel("acro-votes", category=ctx.channel.category, overwrites={ctx
+        self.votes_channel = await ctx.guild.create_text_channel("acro-votes", category=ctx.channel.category, overwrites={ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False)})
                                                                                                                           
     async def start_game(self, ctx):
         self.playing = True
