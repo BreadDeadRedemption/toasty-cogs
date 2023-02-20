@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from typing import Dict
 from collections import Counter
+from redbot.core import commands, RedBot
 
 class AcroCog(commands.Cog):
     def __init__(self, bot):
