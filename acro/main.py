@@ -76,7 +76,19 @@ class AcroCog(commands.Cog):
 
         self.submissions_channel = await ctx.guild.create_text_channel("acro-submissions", category=ctx.channel.category, overwrites={ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False)})
         self.votes_channel = await ctx.guild.create_text_channel("acro-votes", category=ctx.channel.category, overwrites={ctx
-                    await ctx.send(f"Acrophobia game started in {self.submissions_channel.mention}. Players, check your DMs.")
+                                                                                                                          
+    async def start_game(self, ctx):
+        self.playing = True
+        self.submissions.clear()
+        self.votes.clear()
+        self.current_round += 1
+        self.current_acro = generate_acro()
+        self.submissions_channel = ctx.channel
+        await ctx.send(f"Acrophobia game started in {self.submissions_channel.mention}. Players, submit your acronyms for the round starting with the letters {self.current_acro}.")
+        await asyncio.sleep(1)
+        await self.set_game_channel(ctx.channel.id)
+
+        
         for player in self.players:
             try:
                 await player.send(f"Acrophobia game started in {self.submissions_channel.mention}. Submit your answer in this channel.")
