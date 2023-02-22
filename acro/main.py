@@ -1,6 +1,5 @@
 from redbot.core import commands
 import discord
-from discord.ext import commands
 from typing import Dict
 from collections import Counter
 
