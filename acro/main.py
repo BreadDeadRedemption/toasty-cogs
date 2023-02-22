@@ -236,36 +236,3 @@ class AcroCog(commands.Cog):
         self.acro_loop.start()
 
 
-class Acro(commands.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
-
-    @commands.group(invoke_without_command=True)
-    async def acro(self, ctx):
-        await ctx.send_help(ctx.command)
-
-    @acro.command()
-    async def start(self, ctx):
-        acro_game = Acrophobia()
-        await acro_game.start(ctx)
-
-    @acro.command()
-    async def leaderboard(self, ctx):
-        guild_id = str(ctx.guild.id)
-        winners = await bank.get_leaderboard(10, guild_id, _key=lambda x: x.startswith("acro_wins_"))
-        if not winners:
-            return await ctx.send("There are no winners yet.")
-    
-        output = "Acro leaderboard:\n```"
-        for winner in winners:
-            user = ctx.guild.get_member(winner["id"])
-            output.append(f"{user.display_name}: {winner['wins']} wins, {winner['losses']} losses")
-        output = "\n".join(output)
-        await ctx.send(box(output, lang="ini"))
-
-    @acro.command()
-    async def me(self, ctx):
-        user_id = str(ctx.author.id)
-        wins = await bank.get_balance(user_id, "acro_wins")
-        losses = await bank.get_balance(user_id, "acro_losses")
-        await ctx.send(f"{ctx.author.display_name}, your Acrophobia stats: {wins} wins, {losses} losses.")
