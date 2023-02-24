@@ -16,7 +16,7 @@ class ThreadFilterCog(commands.Cog):
                 
     @commands.command()
     async def threadfilter(self, ctx, thread_id: int):
-        thread = await self.bot.fetch_channel(thread_id)
+        thread = discord.utils.get(self.bot.get_all_channels(), id=thread_id)
         if not isinstance(thread, discord.Thread):
             return await ctx.send("Invalid thread ID.")
         if thread.id in self.active_threads:
@@ -24,6 +24,7 @@ class ThreadFilterCog(commands.Cog):
         await thread.add_user(self.bot.user) # Add the bot to the thread
         self.active_threads.append(thread.id)
         await ctx.send(f"Thread {thread.name} is now being filtered.")
+
         
     @commands.command()
     async def removethread(self, ctx, thread_id: int):
