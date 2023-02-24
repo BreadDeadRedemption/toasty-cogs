@@ -17,7 +17,7 @@ class ThreadFilterCog(commands.Cog):
     @commands.command()
     async def threadfilter(self, ctx, thread_id: int):
         thread = discord.utils.get(self.bot.get_all_channels(), id=thread_id)
-        if not isinstance(thread, discord.Thread):
+        if not isinstance(thread, discord.abc.Messageable):
             return await ctx.send("Invalid thread ID.")
         if thread.id in self.active_threads:
             return await ctx.send("Thread is already active.")
