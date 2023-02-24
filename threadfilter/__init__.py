@@ -1,6 +1,4 @@
-from redbot.core import commands
-from .threadfiltercog import ThreadFilterCog
+from .main import ThreadFilterCog
 
 def setup(bot):
-    cog = ThreadFilterCog(bot)
-    bot.add_cog(cog)
+    bot.add_cog(ThreadFilterCog(bot))
