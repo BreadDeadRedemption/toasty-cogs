@@ -1,237 +1,151 @@
-from redbot.core import commands
 import discord
-from typing import Dict
-from collections import Counter
+from redbot.core import commands
+from redbot.core.utils.chat_formatting import box
 
-class AcroCog(commands.Cog):
+class Acro(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.submissions = {}
-        self.author_submissions = {}
-        self.votes = {}
-        self.current_phase = "inactive"
-        self.players = []
-        self.tiebreak_winners = []
-        self.tiebreak_votes = {}
+        self.acro_dict = {}
+        self.acro_ongoing = False
+        self.acro_submission = {}
+        self.acro_votes = {}
+        self.acro_reward = 5000 # Default reward
+        self.acro_leaderboard = {}
 
-    async def acro_loop(self):
-        self.current_phase = "submission"
-        await self.bot.wait_until_ready()
-        while not self.bot.is_closed():
-            if self.current_phase == "submission":
-                await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(self.players)} players"))
-                await self.start_submissions()
-                await self.bot.change_presence(activity=None)
-                await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"Voting for {len(self.submissions)} submissions"))
-                self.current_phase = "voting"
-            elif self.current_phase == "voting":
-                await self.start_voting()
-                self.current_phase = "inactive"
-                await self.update_leaderboard(self.get_leaderboard(self.winners()))
-                await self.end_game()
-            else:
-                await self.bot.change_presence(activity=None)
-                await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"{self.bot.command_prefix}acro start"))
-                await self.acro_on_cooldown(300)
-                await self.bot.change_presence(activity=None)
-
-    @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
-        if message.author.bot:
-            return
-
-        if self.current_phase == "submission" and message.channel.id == self.submissions_channel.id:
-            if message.author not in self.players:
-                return
-            self.submissions[message.author.id] = message.content.lower()
-            self.author_submissions[message.author.id] = str(message.author)
-            await message.delete()
-        elif self.current_phase == "voting" and message.channel.id == self.votes_channel.id:
-            if message.author.id in self.votes or not message.content.isnumeric():
-                return
-            vote = int(message.content)
-            if vote > 0 and vote <= len(self.submissions):
-                self.votes[message.author.id] = vote
-                await message.add_reaction("✅")
-
-        await self.check_votes()
-
-    @commands.group(name="acro", invoke_without_command=True)
+    @commands.command()
     async def acro(self, ctx):
-        """Starts a game of acrophobia"""
-        await ctx.send_help(ctx.command)
-
-    @acro.command(name="start")
-    @commands.cooldown(rate=1, per=300, type=commands.BucketType.guild)
-    async def acro_start(self, ctx):
-        """Starts a game of acrophobia"""
-        if self.current_phase != "inactive":
-            await ctx.send("There's already a game in progress.")
+        if self.acro_ongoing:
+            await ctx.send("A game of Acro is already ongoing.")
             return
+        self.acro_ongoing = True
+        acronym = await self.get_random_acronym()
+        await ctx.send(f"Acrophobia\nGame started. Create a sentence with the following acronym: {acronym}\nYou have 60 seconds to make a submission.")
+        self.acro_dict[ctx.guild.id] = acronym
+        self.acro_submission[ctx.guild.id] = {}
+        self.acro_votes[ctx.guild.id] = {}
+        self.acro_leaderboard[ctx.guild.id] = {}
+        await self.collect_submissions(ctx)
+        await self.vote_submissions(ctx)
 
-        self.players = [member for member in ctx.guild.members if not member.bot and not member.voice.self_mute and not member.voice.deaf]
-        if len(self.players) < 3:
-            await ctx.send("There must be at least 3 players to start a game.")
+    async def get_random_acronym(self):
+        import random
+        import string
+        letters = string.ascii_uppercase.replace("X", "").replace("Z", "")
+        return "".join(random.choice(letters) for i in range(3))
+
+    async def collect_submissions(self, ctx):
+        def check(message):
+            return message.guild == ctx.guild and message.content.upper().startswith(self.acro_dict[ctx.guild.id]) and not message.author.bot
+
+        try:
+            while True:
+                message = await self.bot.wait_for('message', timeout=60, check=check)
+                self.acro_submission[ctx.guild.id][message.author.id] = message.content
+                await message.delete()
+        except:
+            pass
+
+    async def vote_submissions(self, ctx):
+        submissions = list(self.acro_submission[ctx.guild.id].values())
+        if not submissions:
+            await ctx.send("No submissions were received. The game is cancelled.")
+            self.acro_ongoing = False
             return
-
-        self.submissions_channel = await ctx.guild.create_text_channel("acro-submissions", category=ctx.channel.category, overwrites={ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False)})
-        self.votes_channel = await ctx.guild.create_text_channel("acro-votes", category=ctx.channel.category, overwrites={ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False)})
-                                                                                                                          
-    async def start_game(self, ctx):
-        self.playing = True
-        self.submissions.clear()
-        self.votes.clear()
-        self.current_round += 1
-        self.current_acro = generate_acro()
-        self.submissions_channel = ctx.channel
-        await ctx.send(f"Acrophobia game started in {self.submissions_channel.mention}. Players, submit your acronyms for the round starting with the letters {self.current_acro}.")
-        await asyncio.sleep(1)
-        await self.set_game_channel(ctx.channel.id)
-
-        
-        for player in self.players:
-            try:
-                await player.send(f"Acrophobia game started in {self.submissions_channel.mention}. Submit your answer in this channel.")
-            except discord.errors.Forbidden:
-                continue
-
-        await self.acro_loop.start()
-
-    async def acro_on_cooldown(self, duration: int):
-        await asyncio.sleep(duration)
-        await self.submissions_channel.send(f"Acrophobia game is now on cooldown for {duration} seconds.")
-
-    async def start_submissions(self):
-        self.submissions = {}
-        self.author_submissions = {}
-        self.votes = {}
-        self.tiebreak_winners = []
-        self.tiebreak_votes = {}
-        await self.submissions_channel.purge(limit=1000)
-
-        submission_prompt = "Enter your acrophobia submission:"
-        for player in self.players:
-            try:
-                await player.send(submission_prompt)
-            except discord.errors.Forbidden:
-                continue
-
-        await asyncio.sleep(60)
-        await self.submissions_channel.send("Time's up! Voting starts now.")
-
-    async def start_voting(self):
-        self.votes = {}
-        await self.votes_channel.purge(limit=1000)
-
-        submissions_output = "```"
-        for i, (author_id, submission) in enumerate(self.submissions.items()):
-            author = self.author_submissions[author_id]
-            submissions_output += f"{i + 1}. {submission} (Submitted by: {author})\n"
-        submissions_output += "```"
-
-        await self.votes_channel.send(submissions_output)
-
-    async def end_game(self):
-        winners = self.winners()
-        if len(winners) == 0:
-            await self.submissions_channel.send("No one submitted a valid entry. Game over.")
-            await self.submissions_channel.delete()
-            await self.votes_channel.delete()
-            await self.acro_loop.stop()
-            return
-        elif len(winners) == 1:
-            winner_id = winners[0]["id"]
-            winner_name = winners[0]["name"]
-            await self.submissions_channel.send(f"{winner_name} won with their submission: {self.submissions[winner_id]}")
+        submission_list = ["--"]
+        for i, submission in enumerate(submissions):
+            submission_list.append(f"{i+1}. {submission}")
+            self.acro_votes[ctx.guild.id][i+1] = []
+        submission_list.append("--")
+        embed = discord.Embed(title="Acrophobia - Submissions closed", description=f"Acronym was {self.acro_dict[ctx.guild.id]}\n\n" + "\n".join(submission_list), color=discord.Color.blue())
+        message = await ctx.send(embed=embed)
+        for i in range(1, len(submissions)+1):
+            await message.add_reaction(str(i))
+        try:
+            while True:
+                reaction, user = await self.bot.wait_for('reaction_add', timeout=60, check=lambda reaction, user: user != self.bot.user and reaction.message.id == message.id and str(reaction.emoji) in [str(i) for i in range(1, len(submissions)+1)])
+                vote = int(str(reaction.emoji))
+                if vote not in self.acro_votes[ctx.guild.id][vote]:
+                    self.acro_votes[ctx.guild.id][vote].append(user.id)
+                if user.id not in self.acro_votes[ctx.guild.id][vote]:
+                    self.acro_votes[ctx.guild.id][vote].append(user.id)
+            await reaction.message.remove_reaction(reaction, user)
+        except:
+            pass
+        votes = {}
+        for i, submission in enumerate(submissions):
+            votes[i+1] = len(self.acro_votes[ctx.guild.id][i+1])
+        max_vote = max(votes.values())
+        winners = [i for i, vote in votes.items() if vote == max_vote]
+        if len(winners) == 1:
+            winner = winners[0]
+            winning_submission = submissions[winner-1]
+            winner_name = await self.bot.fetch_user(list(self.acro_votes[ctx.guild.id][winner])[0])
+            self.acro_leaderboard[ctx.guild.id][winner_name.id] = self.acro_leaderboard[ctx.guild.id].get(winner_name.id, 0) + 1
+            await ctx.send(f"Acrophobia\nWinner is {winner_name.name} with {max_vote} votes.\nThey win {self.acro_reward} credits!\n{winning_submission}")
         else:
-            self.tiebreak_winners = winners
-            self.tiebreak_votes = {}
-            self.current_phase = "tiebreak"
-            await self.start_tiebreak()
+            await ctx.send("Acrophobia\nThere was a tie. No one wins.")
 
-        await self.submissions_channel.delete()
-        await self.votes_channel.delete()
-        await self.acro_loop.stop()
-
-    def winners(self) -> Dict:
-        if len(self.submissions) == 0:
-            return []
-
-        submission_count = Counter(self.submissions.values())
-        top_submission_count = submission_count.most_common(1)[0][1]
-        top_submissions = [submission for submission, count in submission_count.items() if count == top_submission_count]
-
-        return [{"id": author_id, "name": self.author_submissions[author_id], "submission": submission, "wins": submission_count[submission], "losses": len(self.submissions) - submission_count[submission]} for author_id, submission in self.submissions.items() if submission in top_submissions]
-
-    async def start_tiebreak(self):
-        self.votes = {}
-        await self.votes_channel.purge(limit=1000)
-
-        submissions_output = "```"
-        for i, (author_id, submission) in enumerate(self.submissions.items()):
-            author = self.author_submissions[author_id]
-            if submission in [winner["submission"] for winner in self.tiebreak_winners]:
-                          self.tiebreak_votes[submission] = {"votes": 0, "authors": []}
-            submissions_output += f"{i + 1}. {submission} (Submitted by: {author})\n"
-        submissions_output += "```"
-
-        tiebreak_instructions = "The game has resulted in a tie. Please vote for your favorite submission using the numbers.\n"
-        for submission, data in self.tiebreak_votes.items():
-            tiebreak_instructions += f"{submission}: {data['votes']}\n"
-        await self.votes_channel.send(tiebreak_instructions)
-        await self.votes_channel.send(submissions_output)
-
-    async def handle_vote(self, message: discord.Message):
-        if self.current_phase == "voting":
+@commands.command()
+async def acro_leaderboard(self, ctx):
+    guild_id = ctx.guild.id
+    leaderboard = self.acro_leaderboard[guild_id]
+    sorted_leaderboard = sorted(leaderboard.items(), key=lambda x: x[1], reverse=True)
+    page = 1
+    pages = len(sorted_leaderboard) // 10 + 1
+    while True:
+        start = (page-1)*10
+        end = start + 10
+        leaderboard_str = ""
+        for i, item in enumerate(sorted_leaderboard[start:end]):
+            user = await self.bot.fetch_user(item[0])
+            leaderboard_str += f"{i+start+1}. {user.name} - {item[1]}\n"
+        embed = discord.Embed(title=f"Acro Leaderboard (Server)", description=leaderboard_str, color=discord.Color.blue())
+        embed.set_footer(text=f"Page {page}/{pages}")
+        await ctx.send(embed=embed)
+        if pages > 1:
+            await ctx.send("React with ◀ to go to the previous page or ▶ to go to the next page.")
             try:
-                vote = int(message.content)
-                author_id = message.author.id
-                submission = self.submissions[author_id]
-                if vote in self.votes.values():
-                    return await message.channel.send("You've already voted for that submission.")
-                if vote < 1 or vote > len(self.submissions):
-                    return await message.channel.send(f"Please vote between 1 and {len(self.submissions)}.")
-                self.votes[author_id] = vote
-                if len(self.votes) == len(self.submissions):
-                    await self.start_tiebreak()
-                else:
-                    await message.channel.send(f"Vote for {submission} counted.")
-            except ValueError:
-                pass
+                reaction, user = await self.bot.wait_for('reaction_add', timeout=30, check=lambda reaction, user: user != self.bot.user and reaction.message.id == message.id and str(reaction.emoji) in ["◀", "▶"])
+                if str(reaction.emoji) == "◀" and page > 1:
+                    page -= 1
+                elif str(reaction.emoji) == "▶" and page < pages:
+                    page += 1
+                await reaction.message.remove_reaction(reaction, user)
+            except:
+                break
+        else:
+            break
 
-        elif self.current_phase == "tiebreak":
-            try:
-                vote = int(message.content)
-                submission = list(self.tiebreak_votes.keys())[vote - 1]
-                author_id = list(self.submissions.keys())[list(self.submissions.values()).index(submission)]
-                if author_id in self.tiebreak_votes[submission]["authors"]:
-                    return await message.channel.send("You've already voted for that submission.")
-                self.tiebreak_votes[submission]["votes"] += 1
-                self.tiebreak_votes[submission]["authors"].append(author_id)
-                await message.channel.send(f"Vote for {submission} counted.")
-                await self.check_tiebreak_votes()
-            except (ValueError, IndexError):
-                pass
+@commands.command()
+async def acro_stats(self, ctx, user: discord.Member = None):
+    if user is None:
+        user = ctx.author
+    guild_id = ctx.guild.id
+    total_wins = self.acro_leaderboard[guild_id].get(user.id, 0)
+    total_played = sum(1 for submission in self.acro_submission[guild_id].values() if submission != {})
+    win_loss_ratio = total_wins / total_played if total_played > 0 else 0
+    submissions = [submission for submission in self.acro_submission[guild_id].values() if submission != {}]
+    max_votes = 0
+    for i, submission in enumerate(submissions):
+        if len(self.acro_votes[guild_id][i+1]) > max_votes:
+            max_votes = len(self.acro_votes[guild_id][i+1])
+            winning_submission = submission
+        embed = discord.Embed(title=f"{user.name}'s Acro Stats", color=discord.Color.blue())
+        embed.add_field(name="Total Wins", value=total_wins)
+        embed.add_field(name="Total Played", value=total_played)
+        embed.add_field(name="Win/Loss Ratio", value=win_loss_ratio)
+        if max_votes > 0:
+            embed.add_field(name="Most Popular Submission", value=winning_submission)
+        await ctx.send(embed=embed)
 
-    async def check_tiebreak_votes(self):
-        for submission, data in self.tiebreak_votes.items():
-            if data["votes"] == len(self.tiebreak_winners):
-                await self.submissions_channel.send(f"{submission} won with {data['votes']} votes in the tiebreak round.")
-                await self.end_game()
-                return
+    @commands.group()
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def acro_set(self, ctx):
+        pass
 
-    async def start(self, ctx):
-        self.submissions_channel = ctx.channel
-        self.players = [member for member in self.submissions_channel.members if not member.bot]
-
-        if len(self.players) < 2:
-            await ctx.send("Acrophobia requires at least two players to start.")
-            return
-
-        self.current_phase = "submissions"
-        await self.submissions_channel.send("Acrophobia starting in 10 seconds.")
-        await asyncio.sleep(10)
-
-        self.acro_loop.start()
-
-
+    @acro_set.command()
+    async def reward(self, ctx, value: int):
+        self.acro_reward = value
+        await ctx.send(f"Acro reward set to {value} credits.")
+            
