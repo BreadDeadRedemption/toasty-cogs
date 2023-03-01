@@ -19,7 +19,8 @@ class Acro(commands.Cog):
             return
         self.acro_ongoing = True
         acronym = await self.get_random_acronym()
-        await ctx.send(f"Acrophobia\nGame started. Create a sentence with the following acronym: {acronym}\nYou have 60 seconds to make a submission.")
+        embed = discord.Embed(title="Acrophobia", description=f"Game started. Create a sentence with the following acronym: {acronym}\nYou have 60 seconds to make a submission.", color=discord.Color.blue())
+        await ctx.send(embed=embed)
         self.acro_dict[ctx.guild.id] = acronym
         self.acro_submission[ctx.guild.id] = {}
         self.acro_votes[ctx.guild.id] = {}
@@ -35,7 +36,7 @@ class Acro(commands.Cog):
 
     async def collect_submissions(self, ctx):
         def check(message):
-            return message.guild == ctx.guild and message.content.upper().startswith(self.acro_dict[ctx.guild.id]) and not message.author.bot
+            return message.guild == ctx.guild and message.content.upper().startswith(self.acro_dict[ctx.guild.id].upper()) and not message.author.bot
 
         try:
             while True:
