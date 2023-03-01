@@ -1,5 +1,5 @@
-from .main import AcroCog
+from .main import Acro
 
 
 def setup(bot):
-		bot.add_cog(AcroCog(bot))
+		bot.add_cog(Acro(bot))
