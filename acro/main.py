@@ -36,7 +36,7 @@ class Acro(commands.Cog):
 
     async def collect_submissions(self, ctx):
         def check(message):
-            return message.guild == ctx.guild and message.content.upper().startswith(self.acro_dict[ctx.guild.id].upper()) and not message.author.bot
+            return message.guild == ctx.guild and message.content.upper() == self.acro_dict[ctx.guild.id].upper() and not message.author.bot
 
         try:
             while True:
