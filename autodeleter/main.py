@@ -162,8 +162,20 @@ class AutoDeleter(commands.Cog):
         rules[rule_name] = rule_data
         await self.config.guild(ctx.guild).rules.set(rules)
         await ctx.send(f'Rule "{rule_name}" applied to {channel.mention} successfully.')
+
+        # Initialize the `value` variable here
         value = ""
-        embed.add_field(name='\u200b', value='\u200b', inline=False)
+        embed = discord.Embed(title='Autodeletion Rules', color=discord.Color.blue())
+        for rule_name, rule_data in rules.items():
+            channel_mentions = [ctx.guild.get_channel(c).mention for c in rule_data['applied_channels']]
+            if not channel_mentions:
+                channel_mentions = ['No channels specified']
+            content_type = rule_data['content_type']
+            delay = self.format_delay(rule_data['delay'])
+            targets = ', '.join(rule_data['targets']) or 'Everyone'
+            embed.add_field(name=rule_name, value=f'Channels: {", ".join(channel_mentions)}\nContent type: {content_type}\nDelay: {delay}\nTargets: {targets}\n', inline=False)
+            value += f'Targets: {targets}\n'
+            embed.add_field(name='\u200b', value='\u200b', inline=False)
 
         await ctx.send(embed=embed)
 
