@@ -1,0 +1,6 @@
+{
+  "name": "AutoDeleter",
+  "version": "1.0.0",
+  "description": "A Red Discord bot cog that automatically deletes messages that match certain criteria.",
+  "author": "Bread#3328"
+}
