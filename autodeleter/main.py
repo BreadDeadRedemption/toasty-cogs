@@ -12,6 +12,8 @@ class AutoDeleter(commands.Cog):
         self.config = Config.get_conf(self, identifier=123456789)
         self.config.register_guild(rules={})
 
+
+
     async def delete_message(self, message_id, delay):
         await asyncio.sleep(delay)
         try:
@@ -21,6 +23,51 @@ class AutoDeleter(commands.Cog):
             pass
         finally:
             del self.deletion_tasks[message_id]
+
+    async def message_matches_rule(self, message, rule_data):
+            if rule_data['content_type'] == 'text':
+                if message.content:
+                    return True
+            elif rule_data['content_type'] == 'images':
+                if message.attachments:
+                    for attachment in message.attachments:
+                        if attachment.url.endswith(('.png', '.jpeg', '.jpg', '.gif')):
+                            return True
+                if message.embeds:
+                    for embed in message.embeds:
+                        if embed.type == 'image':
+                            return True
+            elif rule_data['content_type'] == 'links':
+                if message.content:
+                    if re.search("(?P<url>https?://[^\s]+)", message.content):
+                        return True
+                if message.embeds:
+                    for embed in message.embeds:
+                        if embed.type == 'link':
+                            return True
+            elif rule_data['content_type'] == 'attachments':
+                if message.attachments:
+                    return True
+            elif rule_data['content_type'] == 'videos':
+                if message.attachments:
+                    for attachment in message.attachments:
+                        if attachment.url.endswith(('.mp4', '.mov', '.avi')):
+                            return True
+                if message.embeds:
+                    for embed in message.embeds:
+                        if embed.type == 'video':
+                            return True
+            elif rule_data['content_type'] == 'all':
+                return True
+            return False
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        rules = await self.config.guild(message.guild).rules()
+        for rule_name, rule_data in rules.items():
+            if self.message_matches_rule(message, rule_data):
+                task = asyncio.create_task(self.delete_message(message.id, rule_data['delay']))
+                self.deletion_tasks[message.id] = task
 
     @commands.group(name='autodeleter', aliases=['ad'], brief='Automatically deletes messages that match certain criteria.')
     @checks.admin()
