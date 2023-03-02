@@ -162,7 +162,7 @@ class AutoDeleter(commands.Cog):
         rules[rule_name] = rule_data
         await self.config.guild(ctx.guild).rules.set(rules)
         await ctx.send(f'Rule "{rule_name}" applied to {channel.mention} successfully.')
-        value+= f'Targets: {targets}\n'
+        value = ""
         embed.add_field(name='\u200b', value='\u200b', inline=False)
 
         await ctx.send(embed=embed)
