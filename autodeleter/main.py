@@ -92,34 +92,34 @@ class AutoDeleter(commands.Cog):
         (ctx.guild).rules.set(rules)
         await ctx.send(f'Rule "{rule_name}" deleted successfully.')
 
-@autodeleter.command(name='apply', brief='Applies a rule to a channel or thread.')
-async def apply_rule(self, ctx, rule_name, channel: discord.TextChannel):
-    """
-    Applies a rule to a channel or thread.
+    @autodeleter.command(name='apply', brief='Applies a rule to a channel or thread.')
+    async def apply_rule(self, ctx, rule_name, channel: discord.TextChannel):
+        """
+        Applies a rule to a channel or thread.
 
-    Parameters:
-    - rule_name: The name of the rule to apply.
-    - channel: The channel or thread to which the rule should be applied.
-    """
-    rule_name = rule_name.lower()
-    rules = await self.config.guild(ctx.guild).rules()
-    if rule_name not in rules:
-        await ctx.send(f'Rule "{rule_name}" not found.')
-        return
+        Parameters:
+        - rule_name: The name of the rule to apply.
+        - channel: The channel or thread to which the rule should be applied.
+        """
+        rule_name = rule_name.lower()
+        rules = await self.config.guild(ctx.guild).rules()
+        if rule_name not in rules:
+            await ctx.send(f'Rule "{rule_name}" not found.')
+            return
 
-    rule_data = rules[rule_name]
-    if channel.id in rule_data['applied_channels']:
-        await ctx.send(f'Rule "{rule_name}" already applied to {channel.mention}.')
-        return
+        rule_data = rules[rule_name]
+        if channel.id in rule_data['applied_channels']:
+            await ctx.send(f'Rule "{rule_name}" already applied to {channel.mention}.')
+            return
 
-    rule_data['applied_channels'].append(channel.id)
-    rules[rule_name] = rule_data
-    await self.config.guild(ctx.guild).rules.set(rules)
-    await ctx.send(f'Rule "{rule_name}" applied to {channel.mention} successfully.')
-    value+= f'Targets: {targets}\n'
-    embed.add_field(name='\u200b', value='\u200b', inline=False)
+        rule_data['applied_channels'].append(channel.id)
+        rules[rule_name] = rule_data
+        await self.config.guild(ctx.guild).rules.set(rules)
+        await ctx.send(f'Rule "{rule_name}" applied to {channel.mention} successfully.')
+        value+= f'Targets: {targets}\n'
+        embed.add_field(name='\u200b', value='\u200b', inline=False)
 
-    await ctx.send(embed=embed)
+        await ctx.send(embed=embed)
 
 def parse_delay(self, delay_str):
     """
@@ -172,17 +172,17 @@ def format_delay(self, delay):
         return f'{delay}s'
 
 
-@autodeleter.command(name='edit', brief='Edits an existing rule.')
-async def edit_rule(self, ctx, rule_name, content_type='', delay='', targets=''):
-    """
-    Edits an existing autodeletion rule.
+    @autodeleter.command(name='edit', brief='Edits an existing rule.')
+    async def edit_rule(self, ctx, rule_name, content_type='', delay='', targets=''):
+        """
+        Edits an existing autodeletion rule.
 
-    Parameters:
-    - rule_name: The name of the rule to edit.
-    - content_type (optional): The new type of content to be deleted.
-    - delay (optional): The new time delay before the message is deleted.
-    - targets (optional): The new users or roles to which the rule should apply.
-    """
+        Parameters:
+        - rule_name: The name of the rule to edit.
+        - content_type (optional): The new type of content to be deleted.
+        - delay (optional): The new time delay before the message is deleted.
+        - targets (optional): The new users or roles to which the rule should apply.
+        """
     rule_name = rule_name.lower()
     rules = await self.config.guild(ctx.guild).rules()
     if rule_name not in rules:
@@ -207,29 +207,29 @@ async def edit_rule(self, ctx, rule_name, content_type='', delay='', targets='')
     await self.config.guild(ctx.guild).rules.set(rules)
     await ctx.send(f'Rule "{rule_name}" edited successfully.')
 
-@autodeleter.command(name='list', brief='Lists all existing rules.')
-async def list_rules(self, ctx):
-    """
-    Lists all existing autodeletion rules.
-    """
-    rules = await self.config.guild(ctx.guild).rules()
-    if not rules:
-        await ctx.send('No rules found.')
-        return
+    @autodeleter.command(name='list', brief='Lists all existing rules.')
+    async def list_rules(self, ctx):
+        """
+        Lists all existing autodeletion rules.
+        """
+        rules = await self.config.guild(ctx.guild).rules()
+        if not rules:
+            await ctx.send('No rules found.')
+            return
 
-    embed = discord.Embed(title='Autodeletion Rules', color=discord.Color.blue())
-    for rule_name, rule_data in rules.items():
-        channel_mentions = [ctx.guild.get_channel(c).mention for c in rule_data['applied_channels']]
-        if not channel_mentions:
-            channel_mentions = ['No channels specified']
-        content_type = rule_data['content_type']
-        delay = self.format_delay(rule_data['delay'])
-        targets = ', '.join(rule_data['targets']) or 'Everyone'
-        embed.add_field(name=rule_name, value=f'Channels: {", ".join(channel_mentions)}\nContent type: {content_type}\nDelay: {delay}\nTargets: {targets}\n', inline=False)
-        value+= f'Targets: {targets}\n'
-        embed.add_field(name='\u200b', value='\u200b', inline=False)
+        embed = discord.Embed(title='Autodeletion Rules', color=discord.Color.blue())
+        for rule_name, rule_data in rules.items():
+            channel_mentions = [ctx.guild.get_channel(c).mention for c in rule_data['applied_channels']]
+            if not channel_mentions:
+                channel_mentions = ['No channels specified']
+            content_type = rule_data['content_type']
+            delay = self.format_delay(rule_data['delay'])
+            targets = ', '.join(rule_data['targets']) or 'Everyone'
+            embed.add_field(name=rule_name, value=f'Channels: {", ".join(channel_mentions)}\nContent type: {content_type}\nDelay: {delay}\nTargets: {targets}\n', inline=False)
+            value+= f'Targets: {targets}\n'
+            embed.add_field(name='\u200b', value='\u200b', inline=False)
 
-    await ctx.send(embed=embed)
+        await ctx.send(embed=embed)
 
 def parse_delay(self, delay_str):
     """
