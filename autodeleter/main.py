@@ -121,55 +121,55 @@ class AutoDeleter(commands.Cog):
 
         await ctx.send(embed=embed)
 
-def parse_delay(self, delay_str):
-    """
-    Parses a delay string and returns the equivalent number of seconds.
+    def parse_delay(self, delay_str):
+        """
+        Parses a delay string and returns the equivalent number of seconds.
 
-    Parameters:
-    - delay_str: The delay string to parse.
+        Parameters:
+        - delay_str: The delay string to parse.
 
-    Returns:
-    - The number of seconds corresponding to the delay string, or None if the string is invalid.
-    """
-    try:
-        delay = 0
-        units = {
-            's': 1,
-            'm': 60,
-            'h': 3600,
-            'd': 86400,
-            'w': 604800
-        }
-        for unit in units:
-            if unit in delay_str:
-                num_str = delay_str.split(unit)[0]
-                num = int(num_str)
-                delay += num * units[unit]
-                delay_str = delay_str.replace(num_str + unit, '')
-        return delay
-    except:
-        return None
+        Returns:
+        - The number of seconds corresponding to the delay string, or None if the string is invalid.
+        """
+        try:
+            delay = 0
+            units = {
+                's': 1,
+                'm': 60,
+                'h': 3600,
+                'd': 86400,
+                'w': 604800
+            }
+            for unit in units:
+                if unit in delay_str:
+                    num_str = delay_str.split(unit)[0]
+                    num = int(num_str)
+                    delay += num * units[unit]
+                    delay_str = delay_str.replace(num_str + unit, '')
+            return delay
+        except:
+            return None
 
-def format_delay(self, delay):
-    """
-    Formats a delay value in seconds as a string.
+    def format_delay(self, delay):
+        """
+        Formats a delay value in seconds as a string.
 
-    Parameters:
-    - delay: The delay value in seconds.
+        Parameters:
+        - delay: The delay value in seconds.
 
-    Returns:
-    - A string representation of the delay value.
-    """
-    if delay >= 604800:
-        return f'{int(delay / 604800)}w'
-    elif delay >= 86400:
-        return f'{int(delay / 86400)}d'
-    elif delay >= 3600:
-        return f'{int(delay / 3600)}h'
-    elif delay >= 60:
-        return f'{int(delay / 60)}m'
-    else:
-        return f'{delay}s'
+        Returns:
+        - A string representation of the delay value.
+        """
+        if delay >= 604800:
+            return f'{int(delay / 604800)}w'
+        elif delay >= 86400:
+            return f'{int(delay / 86400)}d'
+        elif delay >= 3600:
+            return f'{int(delay / 3600)}h'
+        elif delay >= 60:
+            return f'{int(delay / 60)}m'
+        else:
+            return f'{delay}s'
 
 
     @autodeleter.command(name='edit', brief='Edits an existing rule.')
@@ -230,54 +230,3 @@ def format_delay(self, delay):
             embed.add_field(name='\u200b', value='\u200b', inline=False)
 
         await ctx.send(embed=embed)
-
-    def parse_delay(self, delay_str):
-        """
-        Parses a delay string and returns the equivalent number of seconds.
-
-        Parameters:
-        - delay_str: The delay string to parse.
-
-        Returns:
-        - The number of seconds corresponding to the delay string, or None if the string is invalid.
-        """
-        try:
-            delay = 0
-            units = {
-                's': 1,
-                'm': 60,
-                'h': 3600,
-                'd': 86400,
-                'w': 604800
-            }
-            for unit in units:
-                if unit in delay_str:
-                    num_str = delay_str.split(unit)[0]
-                    num = int(num_str)
-                    delay += num * units[unit]
-                    delay_str = delay_str.replace(num_str + unit, '')
-            return delay
-        except:
-            return None
-
-    def format_delay(self, delay):
-        """
-        Formats a delay value in seconds as a string.
-
-        Parameters:
-        - delay: The delay value in seconds.
-
-        Returns:
-        - A string representation of the delay value.
-        """
-        if delay >= 604800:
-            return f'{int(delay / 604800)}w'
-        elif delay >= 86400:
-            return f'{int(delay / 86400)}d'
-        elif delay >= 3600:
-            return f'{int(delay / 3600)}h'
-        elif delay >= 60:
-            return f'{int(delay / 60)}m'
-        else:
-            return f'{delay}s'
-
