@@ -88,8 +88,7 @@ class AutoDeleter(commands.Cog):
             return
 
         del rules[rule_name]
-        await self.config.guild
-        (ctx.guild).rules.set(rules)
+        await self.config.guild(ctx.guild).rules.set(rules)
         await ctx.send(f'Rule "{rule_name}" deleted successfully.')
 
     @autodeleter.command(name='apply', brief='Applies a rule to a channel or thread.')
@@ -183,29 +182,30 @@ class AutoDeleter(commands.Cog):
         - delay (optional): The new time delay before the message is deleted.
         - targets (optional): The new users or roles to which the rule should apply.
         """
+        value = ""
         rule_name = rule_name.lower()
         rules = await self.config.guild(ctx.guild).rules()
         if rule_name not in rules:
             await ctx.send(f'Rule "{rule_name}" not found.')
             return
 
-            rule_data = rules[rule_name]
-            if content_type:
-                rule_data['content_type'] = content_type.lower()
-            if delay:
-                delay = self.parse_delay(delay)
-                if delay is None:
-                    await ctx.send('Invalid delay format. Please use the format "1s", "1m", "1h", "1d", or "1w".')
-                    return
-                rule_data['delay'] = delay
-            if targets:
-                targets = targets.split(',')
-                targets = [t.strip() for t in targets]
-                rule_data['targets'] = targets
+        rule_data = rules[rule_name]
+        if content_type:
+            rule_data['content_type'] = content_type.lower()
+        if delay:
+            delay = self.parse_delay(delay)
+            if delay is None:
+                await ctx.send('Invalid delay format. Please use the format "1s", "1m", "1h", "1d", or "1w".')
+                return
+            rule_data['delay'] = delay
+        if targets:
+            targets = targets.split(',')
+            targets = [t.strip() for t in targets]
+            rule_data['targets'] = targets
 
-            rules[rule_name] = rule_data
-            await self.config.guild(ctx.guild).rules.set(rules)
-            await ctx.send(f'Rule "{rule_name}" edited successfully.')
+        rules[rule_name] = rule_data
+        await self.config.guild(ctx.guild).rules.set(rules)
+        await ctx.send(f'Rule "{rule_name}" edited successfully.')
 
     @autodeleter.command(name='list', brief='Lists all existing rules.')
     async def list_rules(self, ctx):
@@ -218,6 +218,7 @@ class AutoDeleter(commands.Cog):
             return
 
         embed = discord.Embed(title='Autodeletion Rules', color=discord.Color.blue())
+        value = ""
         for rule_name, rule_data in rules.items():
             channel_mentions = [ctx.guild.get_channel(c).mention for c in rule_data['applied_channels']]
             if not channel_mentions:
