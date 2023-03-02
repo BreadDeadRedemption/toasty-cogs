@@ -3,6 +3,7 @@ import discord
 from redbot.core import commands
 from redbot.core import checks
 from redbot.core import Config
+import logging
 
 class AutoDeleter(commands.Cog):
     """Automatically deletes messages that match certain criteria."""
@@ -11,16 +12,18 @@ class AutoDeleter(commands.Cog):
         self.deletion_tasks = {}
         self.config = Config.get_conf(self, identifier=123456789)
         self.config.register_guild(rules={})
-
+        self.logger = logging.getLogger("red.breadbot.autodeleter")
 
 
     async def delete_message(self, message_id, delay):
+        print(f"Deleting message {message_id} in {delay} seconds...")  # add this line
         await asyncio.sleep(delay)
         try:
             message = await self.bot.get_channel(message.channel.id).fetch_message(message_id)
             await message.delete()
+            self.logger.info(f"Deleted message '{message.content}' in channel '{message.channel}' with rule '{rule_name}'.")
         except:
-            pass
+            self.logger.warning(f"Failed to delete message '{message_id}'.")
         finally:
             del self.deletion_tasks[message_id]
 
@@ -64,6 +67,7 @@ class AutoDeleter(commands.Cog):
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         rules = await self.config.guild(message.guild).rules()
+        print(f"Deleted message content: {message.content}")  # add this line
         for rule_name, rule_data in rules.items():
             if self.message_matches_rule(message, rule_data):
                 task = asyncio.create_task(self.delete_message(message.id, rule_data['delay']))
@@ -162,21 +166,10 @@ class AutoDeleter(commands.Cog):
         rules[rule_name] = rule_data
         await self.config.guild(ctx.guild).rules.set(rules)
         await ctx.send(f'Rule "{rule_name}" applied to {channel.mention} successfully.')
+        value+= f'Targets: {targets}\n'
+        embed.add_field(name='\u200b', value='\u200b', inline=False)
 
-        # Initialize the `value` variable here
-        value = ""
-        embed = discord.Embed(title='Autodeletion Rules', color=discord.Color.blue())
-        for rule_name, rule_data in rules.items():
-            channel_mentions = [ctx.guild.get_channel(c).mention for c in rule_data['applied_channels']]
-            if not channel_mentions:
-                channel_mentions = ['No channels specified']
-            content_type = rule_data['content_type']
-            delay = self.format_delay(rule_data['delay'])
-            targets = ', '.join(rule_data['targets']) or 'Everyone'
-            embed.add_field(name=rule_name, value=f'Channels: {", ".join(channel_mentions)}\nContent type: {content_type}\nDelay: {delay}\nTargets: {targets}\n', inline=False)
-            value += f'Targets: {targets}\n'
-            embed.add_field(name='\u200b', value='\u200b', inline=False)
-
+        print(embed.to_dict())  # add this line
         await ctx.send(embed=embed)
 
     def parse_delay(self, delay_str):
