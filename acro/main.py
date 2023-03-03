@@ -42,25 +42,35 @@ class Acro(commands.Cog):
 
 
     async def collect_submissions(self, ctx):
+        # Get the acronym for this round
         acronym = self.acro_dict[ctx.guild.id]
-
-        def check(message, acronym=acronym):
-            words = message.content.split()
-            return message.guild == ctx.guild and all(acronym[i].upper() in [word[0].upper() for word in words] for i in range(len(acronym))) and not message.author.bot
-
+        # Set the number of submissions needed to proceed to the voting phase
+        submissions_needed = 3
+        # Define a check function that verifies the message meets the submission requirements
+        def check(message):
+            return (
+                message.guild == ctx.guild
+                and not message.author.bot
+                and message.content
+                and all(word[0].upper() == acronym[i] for i, word in enumerate(message.content.split()))
+            )
         try:
+            # Wait for messages that meet the submission requirements
             while True:
-                message = await self.bot.wait_for('message', timeout=60, check=check)
+                message = await self.bot.wait_for("message", timeout=60, check=check)
+                # Store the submission in a dictionary keyed by author ID
                 self.acro_submission[ctx.guild.id][message.author.id] = message.content
                 await message.delete()
-                if len(self.acro_submission[ctx.guild.id]) == len(ctx.guild.members) - 1:
-                    break
         except asyncio.TimeoutError:
+            # If the timeout has been reached, end the submission phase
             await ctx.send("Time's up! Submissions are now closed.")
         except Exception as e:
+            # If an error occurred, end the game
             await ctx.send(f"An error occurred while collecting submissions: {e}")
             self.acro_ongoing = False
             return
+
+
 
     async def vote_submissions(self, ctx):
         submissions = list(self.acro_submission[ctx.guild.id].values())
