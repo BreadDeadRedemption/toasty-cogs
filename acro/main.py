@@ -42,15 +42,21 @@ class Acro(commands.Cog):
 
 
     async def collect_submissions(self, ctx):
-        acronym = self.acro_dict[ctx.guild.id]
+        acronym = await self.get_random_acronym()
 
         def check(message, acronym=acronym):
             words = message.content.split()
-            return message.guild == ctx.guild and all(word.upper().startswith(acronym[i]) for i, word in enumerate(words)) and not message.author.bot
+            first_letters = [word[0].upper() for word in words]
+            return (
+                message.guild == ctx.guild and
+                len(acronym) == len(first_letters) and
+                all(letter.upper() == acronym[i] for i, letter in enumerate(first_letters)) and
+                not message.author.bot
+            )
 
         try:
             while True:
-                message = await self.bot.wait_for('message', timeout=60, check=lambda m: check(m))
+                message = await self.bot.wait_for('message', timeout=60, check=check)
                 self.acro_submission[ctx.guild.id][message.author.id] = message.content
                 await message.delete()
                 if len(self.acro_submission[ctx.guild.id]) == len(ctx.guild.members) - 1:
@@ -66,6 +72,7 @@ class Acro(commands.Cog):
             await ctx.send("Not enough submissions received. The game is cancelled.")
             self.acro_ongoing = False
             return
+
 
     async def vote_submissions(self, ctx):
         submissions = list(self.acro_submission[ctx.guild.id].values())
