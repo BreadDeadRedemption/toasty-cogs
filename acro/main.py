@@ -48,11 +48,12 @@ class Acro(commands.Cog):
         submissions_needed = 3
         # Define a check function that verifies the message meets the submission requirements
         def check(message):
+            words = message.content.split()
             return (
-                message.guild == ctx.guild
-                and not message.author.bot
-                and message.content
-                and all(word[0].upper() == acronym[i] for i, word in enumerate(message.content.split()))
+                message.guild == ctx.guild and  # Same guild as command was issued in
+                not message.author.bot and  # Not sent by a bot
+                words and  # Not empty
+                all(word[0].upper() == acronym[i] for i, word in enumerate(words))  # Words start with acronym letters
             )
         try:
             # Wait for messages that meet the submission requirements
