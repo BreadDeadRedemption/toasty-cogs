@@ -19,7 +19,7 @@ class Acro(commands.Cog):
             return
         self.acro_ongoing = True
         acronym = await self.get_random_acronym()
-        embed = discord.Embed(title="Acrophobia", description=f"Game started. Create a sentence with the following acronym: {acronym}\nYou have 60 seconds to make a submission.", color=discord.Color.blue())
+        embed = discord.Embed(title="Acrophobia", description=f"Game started. Create a sentence with the following acronym: {acronym}\nYou have 60 seconds to make a submission.", color=discord.Color.green())
         await ctx.send(embed=embed)
         self.acro_dict[ctx.guild.id] = acronym
         self.acro_submission[ctx.guild.id] = {}
@@ -83,7 +83,7 @@ class Acro(commands.Cog):
                     self.acro_votes[ctx.guild.id][vote].append(user.id)
                 if user.id not in self.acro_votes[ctx.guild.id][vote]:
                     self.acro_votes[ctx.guild.id][vote].append(user.id)
-            await reaction.message.remove_reaction(reaction, user)
+                await reaction.message.remove_reaction(reaction, user)
         except:
             pass
         votes = {}
@@ -153,14 +153,14 @@ class Acro(commands.Cog):
                 embed.add_field(name="Most Popular Submission", value=winning_submission)
             await ctx.send(embed=embed)
 
-        @commands.group()
-        @commands.guild_only()
-        @commands.has_permissions(administrator=True)
-        async def acro_set(self, ctx):
-            pass
+    @commands.group()
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def acro_set(self, ctx):
+        pass
 
-        @acro_set.command()
-        async def reward(self, ctx, value: int):
-            self.acro_reward = value
-            await ctx.send(f"Acro reward set to {value} credits.")
-                
+    @acro_set.command()
+    async def reward(self, ctx, value: int):
+        self.acro_reward = value
+        await ctx.send(f"Acro reward set to {value} credits.")
+            
