@@ -43,6 +43,7 @@ class Acro(commands.Cog):
 
     @staticmethod
     def validate_submission(acronym: str, submission: str) -> bool:
+        print(f"Validating submission: {submission}")
         # Remove periods from submission
         submission = submission.replace(".", "").replace(",", "").replace(";", "").replace(":", "").replace("-", " ").replace("_", " ").replace("!", "").replace("?", "").replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace("{", "").replace("}", "")
         
@@ -51,26 +52,33 @@ class Acro(commands.Cog):
         
         # Check if submission has the same number of words as acronym
         if len(words) != len(acronym):
+            print("Invalid submission: wrong number of words")
             return False
         
         # Check if all words start with the corresponding letter in the acronym
         if not all(word[0].upper() == acronym[i] for i, word in enumerate(words)):
+            print("Invalid submission: words don't start with the corresponding letters")
             return False
         
         # Check if all words are at least 2 characters long
         if not all(len(word) >= 2 for word in words):
+            print("Invalid submission: words are too short")
             return False
         
         # Check if all characters in the acronym are alphabetic
         if not all(char.isalpha() for char in acronym):
+            print("Invalid submission: non-alphabetic characters in the acronym")
             return False
         
         # Check if the submission contains only alphabetic characters and whitespace
         if not all(char.isalpha() or char.isspace() for char in submission):
+            print("Invalid submission: non-alphabetic characters in the submission")
             return False
         
         # The submission is valid if it passes all checks
+        print("Submission is valid")
         return True
+
 
     ...
 
