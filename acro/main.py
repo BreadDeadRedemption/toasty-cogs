@@ -32,11 +32,15 @@ class Acro(commands.Cog):
         import random
         import string
         letters = string.ascii_uppercase.replace("X", "").replace("Z", "")
-        return "".join(random.choice(letters) for i in range(3, 6))
+        length = random.randint(3, 6)
+        return ".".join(random.choice(letters) for i in range(length))
+
 
     async def collect_submissions(self, ctx):
         def check(message):
-            return message.guild == ctx.guild and message.content.upper() == self.acro_dict[ctx.guild.id].upper() and not message.author.bot
+            words = message.content.split()
+            acronym = self.acro_dict[ctx.guild.id].upper()
+            return message.guild == ctx.guild and all(word.upper().startswith(acronym[i]) for i, word in enumerate(words)) and not message.author.bot
 
 
         try:
