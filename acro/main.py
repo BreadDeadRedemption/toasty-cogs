@@ -26,7 +26,11 @@ class Acro(commands.Cog):
         self.acro_votes[ctx.guild.id] = {}
         self.acro_leaderboard[ctx.guild.id] = {}
         await self.collect_submissions(ctx)
-        await self.vote_submissions(ctx)
+        if self.acro_submission[ctx.guild.id]:
+            await self.vote_submissions(ctx)
+        else:
+            self.acro_ongoing = False
+
 
     async def get_random_acronym(self):
         import random
