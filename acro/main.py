@@ -50,16 +50,7 @@ class Acro(commands.Cog):
         except:
             pass
 
-
-
-        try:
-            while True:
-                message = await self.bot.wait_for('message', timeout=60, check=check)
-                self.acro_submission[ctx.guild.id][message.author.id] = message.content
-                await message.delete()
-        except:
-            pass
-
+        
     async def vote_submissions(self, ctx):
         submissions = list(self.acro_submission[ctx.guild.id].values())
         if not submissions:
