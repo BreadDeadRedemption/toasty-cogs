@@ -41,27 +41,53 @@ class Acro(commands.Cog):
         return ".".join(random.choice(letters) for i in range(length))
 
 
+    def validate_submission(acronym: str, submission: str) -> bool:
+        # Remove periods from submission
+        submission = submission.replace(".", "").replace(",", "").replace(";", "").replace(":", "").replace("-", " ").replace("_", " ").replace("!", "").replace("?", "").replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace("{", "").replace("}", "")
+        
+        # Split submission into words
+        words = submission.split()
+        
+        # Check if submission has the same number of words as acronym
+        if len(words) != len(acronym):
+            return False
+        
+        # Check if all words start with the corresponding letter in the acronym
+        if not all(word[0].upper() == acronym[i] for i, word in enumerate(words)):
+            return False
+        
+        # Check if all words are at least 2 characters long
+        if not all(len(word) >= 2 for word in words):
+            return False
+        
+        # Check if all characters in the acronym are alphabetic
+        if not all(char.isalpha() for char in acronym):
+            return False
+        
+        # Check if the submission contains only alphabetic characters and whitespace
+        if not all(char.isalpha() or char.isspace() for char in submission):
+            return False
+        
+        # The submission is valid if it passes all checks
+        return True
+
+
     async def collect_submissions(self, ctx):
         # Get the acronym for this round
         acronym = self.acro_dict[ctx.guild.id]
-        # Define a check function that verifies the message meets the submission requirements
-        def check(message):
-            words = message.content.split()
-            if len(words) != len(acronym):
-                return False
-            for word, letter in zip(words, acronym):
-                if len(word) == 0 or not word[0].upper() == letter:
-                    return False
-            return True and not message.author.bot and message.guild == ctx.guild
         # Set the number of submissions needed to proceed to the voting phase
         submissions_needed = 3
         try:
             # Wait for messages that meet the submission requirements
             while True:
                 message = await self.bot.wait_for("message", timeout=60, check=check)
-                # Store the submission in a dictionary keyed by author ID
-                self.acro_submission[ctx.guild.id][message.author.id] = message.content
-                await message.delete()
+                # Validate the submission
+                if validate_submission(acronym, message.content):
+                    # Store the submission in a dictionary keyed by author ID
+                    self.acro_submission[ctx.guild.id][message.author.id] = message.content
+                    await message.delete()
+                else:
+                    await ctx.send(f"Invalid submission by {message.author.mention}. Please try again.")
         except asyncio.TimeoutError:
             # If the timeout has been reached, end the submission phase
             await ctx.send("Time's up! Submissions are now closed.")
@@ -70,6 +96,7 @@ class Acro(commands.Cog):
             await ctx.send(f"An error occurred while collecting submissions: {e}")
             self.acro_ongoing = False
             return
+
 
 
 
