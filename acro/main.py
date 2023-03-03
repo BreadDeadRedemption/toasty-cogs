@@ -44,7 +44,7 @@ class Acro(commands.Cog):
     async def collect_submissions(self, ctx):
         acronym = await self.get_random_acronym()
 
-        def check(message, acronym):
+        def check(message, acronym=acronym):
             words = message.content.split()
             return message.guild == ctx.guild and all(word.upper().startswith(acronym[i]) for i, word in enumerate(words)) and not message.author.bot
 
