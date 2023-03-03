@@ -80,7 +80,7 @@ class Acro(commands.Cog):
         try:
             # Wait for messages that meet the submission requirements
             while True:
-                message = await self.bot.wait_for("message", timeout=60, check=check)
+                message = await self.bot.wait_for("message", timeout=60)
                 # Validate the submission
                 if validate_submission(acronym, message.content):
                     # Store the submission in a dictionary keyed by author ID
