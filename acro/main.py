@@ -93,67 +93,67 @@ class Acro(commands.Cog):
         else:
             await ctx.send("Acrophobia\nThere was a tie. No one wins.")
 
-@commands.command()
-async def acro_leaderboard(self, ctx):
-    guild_id = ctx.guild.id
-    leaderboard = self.acro_leaderboard[guild_id]
-    sorted_leaderboard = sorted(leaderboard.items(), key=lambda x: x[1], reverse=True)
-    page = 1
-    pages = len(sorted_leaderboard) // 10 + 1
-    while True:
-        start = (page-1)*10
-        end = start + 10
-        leaderboard_str = ""
-        for i, item in enumerate(sorted_leaderboard[start:end]):
-            user = await self.bot.fetch_user(item[0])
-            leaderboard_str += f"{i+start+1}. {user.name} - {item[1]}\n"
-        embed = discord.Embed(title=f"Acro Leaderboard (Server)", description=leaderboard_str, color=discord.Color.blue())
-        embed.set_footer(text=f"Page {page}/{pages}")
-        await ctx.send(embed=embed)
-        if pages > 1:
-            await ctx.send("React with ◀ to go to the previous page or ▶ to go to the next page.")
-            try:
-                reaction, user = await self.bot.wait_for('reaction_add', timeout=30, check=lambda reaction, user: user != self.bot.user and reaction.message.id == message.id and str(reaction.emoji) in ["◀", "▶"])
-                if str(reaction.emoji) == "◀" and page > 1:
-                    page -= 1
-                elif str(reaction.emoji) == "▶" and page < pages:
-                    page += 1
-                await reaction.message.remove_reaction(reaction, user)
-            except:
+    @commands.command()
+    async def acro_leaderboard(self, ctx):
+        guild_id = ctx.guild.id
+        leaderboard = self.acro_leaderboard[guild_id]
+        sorted_leaderboard = sorted(leaderboard.items(), key=lambda x: x[1], reverse=True)
+        page = 1
+        pages = len(sorted_leaderboard) // 10 + 1
+        while True:
+            start = (page-1)*10
+            end = start + 10
+            leaderboard_str = ""
+            for i, item in enumerate(sorted_leaderboard[start:end]):
+                user = await self.bot.fetch_user(item[0])
+                leaderboard_str += f"{i+start+1}. {user.name} - {item[1]}\n"
+            embed = discord.Embed(title=f"Acro Leaderboard (Server)", description=leaderboard_str, color=discord.Color.blue())
+            embed.set_footer(text=f"Page {page}/{pages}")
+            await ctx.send(embed=embed)
+            if pages > 1:
+                await ctx.send("React with ◀ to go to the previous page or ▶ to go to the next page.")
+                try:
+                    reaction, user = await self.bot.wait_for('reaction_add', timeout=30, check=lambda reaction, user: user != self.bot.user and reaction.message.id == message.id and str(reaction.emoji) in ["◀", "▶"])
+                    if str(reaction.emoji) == "◀" and page > 1:
+                        page -= 1
+                    elif str(reaction.emoji) == "▶" and page < pages:
+                        page += 1
+                    await reaction.message.remove_reaction(reaction, user)
+                except:
+                    break
+            else:
                 break
-        else:
-            break
 
-@commands.command()
-async def acro_stats(self, ctx, user: discord.Member = None):
-    if user is None:
-        user = ctx.author
-    guild_id = ctx.guild.id
-    total_wins = self.acro_leaderboard[guild_id].get(user.id, 0)
-    total_played = sum(1 for submission in self.acro_submission[guild_id].values() if submission != {})
-    win_loss_ratio = total_wins / total_played if total_played > 0 else 0
-    submissions = [submission for submission in self.acro_submission[guild_id].values() if submission != {}]
-    max_votes = 0
-    for i, submission in enumerate(submissions):
-        if len(self.acro_votes[guild_id][i+1]) > max_votes:
-            max_votes = len(self.acro_votes[guild_id][i+1])
-            winning_submission = submission
-        embed = discord.Embed(title=f"{user.name}'s Acro Stats", color=discord.Color.blue())
-        embed.add_field(name="Total Wins", value=total_wins)
-        embed.add_field(name="Total Played", value=total_played)
-        embed.add_field(name="Win/Loss Ratio", value=win_loss_ratio)
-        if max_votes > 0:
-            embed.add_field(name="Most Popular Submission", value=winning_submission)
-        await ctx.send(embed=embed)
+    @commands.command()
+    async def acro_stats(self, ctx, user: discord.Member = None):
+        if user is None:
+            user = ctx.author
+        guild_id = ctx.guild.id
+        total_wins = self.acro_leaderboard[guild_id].get(user.id, 0)
+        total_played = sum(1 for submission in self.acro_submission[guild_id].values() if submission != {})
+        win_loss_ratio = total_wins / total_played if total_played > 0 else 0
+        submissions = [submission for submission in self.acro_submission[guild_id].values() if submission != {}]
+        max_votes = 0
+        for i, submission in enumerate(submissions):
+            if len(self.acro_votes[guild_id][i+1]) > max_votes:
+                max_votes = len(self.acro_votes[guild_id][i+1])
+                winning_submission = submission
+            embed = discord.Embed(title=f"{user.name}'s Acro Stats", color=discord.Color.blue())
+            embed.add_field(name="Total Wins", value=total_wins)
+            embed.add_field(name="Total Played", value=total_played)
+            embed.add_field(name="Win/Loss Ratio", value=win_loss_ratio)
+            if max_votes > 0:
+                embed.add_field(name="Most Popular Submission", value=winning_submission)
+            await ctx.send(embed=embed)
 
-    @commands.group()
-    @commands.guild_only()
-    @commands.has_permissions(administrator=True)
-    async def acro_set(self, ctx):
-        pass
+        @commands.group()
+        @commands.guild_only()
+        @commands.has_permissions(administrator=True)
+        async def acro_set(self, ctx):
+            pass
 
-    @acro_set.command()
-    async def reward(self, ctx, value: int):
-        self.acro_reward = value
-        await ctx.send(f"Acro reward set to {value} credits.")
-            
+        @acro_set.command()
+        async def reward(self, ctx, value: int):
+            self.acro_reward = value
+            await ctx.send(f"Acro reward set to {value} credits.")
+                
