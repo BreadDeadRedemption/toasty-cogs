@@ -41,7 +41,7 @@ class Acro(commands.Cog):
         return ".".join(random.choice(letters) for i in range(length))
 
 
-    def validate_submission(acronym: str, submission: str) -> bool:
+    def validate_submission(self, acronym: str, submission: str) -> bool:
         # Remove periods from submission
         submission = submission.replace(".", "").replace(",", "").replace(";", "").replace(":", "").replace("-", " ").replace("_", " ").replace("!", "").replace("?", "").replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace("{", "").replace("}", "")
         
