@@ -53,8 +53,11 @@ class Acro(commands.Cog):
                 message = await self.bot.wait_for('message', timeout=60, check=lambda m: check(m, acronym))
                 self.acro_submission[ctx.guild.id][message.author.id] = message.content
                 await message.delete()
+                if len(self.acro_submission[ctx.guild.id]) == len(ctx.guild.members) - 1:
+                    break
         except:
             pass
+
 
         
     async def vote_submissions(self, ctx):
