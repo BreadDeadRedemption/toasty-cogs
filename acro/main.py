@@ -36,15 +36,17 @@ class Acro(commands.Cog):
         return ".".join(random.choice(letters) for i in range(length))
 
 
+
     async def collect_submissions(self, ctx):
-        def check(message):
+        acronym = await self.get_random_acronym()
+
+        def check(message, acronym):
             words = message.content.split()
-            acronym = await self.get_random_acronym()
             return message.guild == ctx.guild and all(word.upper().startswith(acronym[i]) for i, word in enumerate(words)) and not message.author.bot
 
         try:
             while True:
-                message = await self.bot.wait_for('message', timeout=60, check=check)
+                message = await self.bot.wait_for('message', timeout=60, check=lambda m: check(m, acronym))
                 self.acro_submission[ctx.guild.id][message.author.id] = message.content
                 await message.delete()
         except:
