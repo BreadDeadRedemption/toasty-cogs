@@ -41,9 +41,8 @@ class Acro(commands.Cog):
         return ".".join(random.choice(letters) for i in range(length))
 
 
-
     async def collect_submissions(self, ctx):
-        acronym = await self.get_random_acronym()
+        acronym = self.acro_dict[ctx.guild.id]
 
         def check(message, acronym=acronym):
             words = message.content.split()
@@ -68,12 +67,6 @@ class Acro(commands.Cog):
             self.acro_ongoing = False
             return
 
-
-
-
-
-
-            
     async def vote_submissions(self, ctx):
         submissions = list(self.acro_submission[ctx.guild.id].values())
         if not submissions:
