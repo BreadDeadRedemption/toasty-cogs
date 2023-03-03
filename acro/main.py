@@ -41,7 +41,8 @@ class Acro(commands.Cog):
         return ".".join(random.choice(letters) for i in range(length))
 
 
-    def validate_submission(self, acronym: str, submission: str) -> bool:
+    @staticmethod
+    def validate_submission(acronym: str, submission: str) -> bool:
         # Remove periods from submission
         submission = submission.replace(".", "").replace(",", "").replace(";", "").replace(":", "").replace("-", " ").replace("_", " ").replace("!", "").replace("?", "").replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace("{", "").replace("}", "")
         
@@ -71,9 +72,10 @@ class Acro(commands.Cog):
         # The submission is valid if it passes all checks
         return True
 
+    ...
 
     async def collect_submissions(self, ctx):
-        # Get the acronym for this round
+    # Get the acronym for this round
         acronym = self.acro_dict[ctx.guild.id]
         # Set the number of submissions needed to proceed to the voting phase
         submissions_needed = 3
@@ -96,6 +98,7 @@ class Acro(commands.Cog):
             await ctx.send(f"An error occurred while collecting submissions: {e}")
             self.acro_ongoing = False
             return
+
 
 
 
