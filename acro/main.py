@@ -32,11 +32,12 @@ class Acro(commands.Cog):
         import random
         import string
         letters = string.ascii_uppercase.replace("X", "").replace("Z", "")
-        return "".join(random.choice(letters) for i in range(3))
+        return "".join(random.choice(letters) for i in range(3, 6))
 
     async def collect_submissions(self, ctx):
         def check(message):
             return message.guild == ctx.guild and message.content.upper() == self.acro_dict[ctx.guild.id].upper() and not message.author.bot
+
 
         try:
             while True:
