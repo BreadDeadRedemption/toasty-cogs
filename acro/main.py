@@ -44,17 +44,17 @@ class Acro(commands.Cog):
     async def collect_submissions(self, ctx):
         # Get the acronym for this round
         acronym = self.acro_dict[ctx.guild.id]
-        # Set the number of submissions needed to proceed to the voting phase
-        submissions_needed = 3
         # Define a check function that verifies the message meets the submission requirements
         def check(message):
             words = message.content.split()
-            return (
-                message.guild == ctx.guild and  # Same guild as command was issued in
-                not message.author.bot and  # Not sent by a bot
-                words and  # Not empty
-                all(word[0].upper() == acronym[i] for i, word in enumerate(words))  # Words start with acronym letters
-            )
+            if len(words) != len(acronym):
+                return False
+            for word, letter in zip(words, acronym):
+                if len(word) == 0 or not word[0].upper() == letter:
+                    return False
+            return True and not message.author.bot and message.guild == ctx.guild
+        # Set the number of submissions needed to proceed to the voting phase
+        submissions_needed = 3
         try:
             # Wait for messages that meet the submission requirements
             while True:
@@ -70,6 +70,7 @@ class Acro(commands.Cog):
             await ctx.send(f"An error occurred while collecting submissions: {e}")
             self.acro_ongoing = False
             return
+
 
 
 
