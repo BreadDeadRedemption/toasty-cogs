@@ -82,7 +82,7 @@ class Acro(commands.Cog):
             while True:
                 message = await self.bot.wait_for("message", timeout=60)
                 # Validate the submission
-                if validate_submission(acronym, message.content):
+                if self.validate_submission(acronym, message.content):
                     # Store the submission in a dictionary keyed by author ID
                     self.acro_submission[ctx.guild.id][message.author.id] = message.content
                     await message.delete()
