@@ -48,6 +48,7 @@ class Acro(commands.Cog):
             words = message.content.split()
             return message.guild == ctx.guild and all(word.upper().startswith(acronym[i]) for i, word in enumerate(words)) and not message.author.bot
 
+
         try:
             while True:
                 message = await self.bot.wait_for('message', timeout=60, check=lambda m: check(m))
