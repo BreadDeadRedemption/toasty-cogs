@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 from redbot.core import checks, commands
 from redbot.core.bot import Red
-from .utils.database import SimpUser
+from .database import SimpUser
 
 
 class SimpTracker(commands.Cog):
