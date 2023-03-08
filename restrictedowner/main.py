@@ -6,18 +6,12 @@ class RestrictedOwner(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.owner = bot.owner
-        self.approved_owners = {self.bot.owner_id}
-        self.owner = self.bot.get_user(self.bot.owner_id)
+        self.approved_owners = {self.bot.owner_id[0]}
         
     @commands.group(invoke_without_command=True)
     async def owner(self, ctx):
         """View bot owners and approved owners."""
-        owners = []
-        for owner_id in self.bot.owner_ids:
-            owner = self.bot.get_user(owner_id)
-            if owner:
-                owners.append(f"{owner.name}#{owner.discriminator} (`{owner.id}`)")
+        owners = [f"{self.bot.owner.name}#{self.bot.owner.discriminator} (`{self.bot.owner.id}`)"]
         approved = []
         for owner_id in self.approved_owners:
             owner = self.bot.get_user(owner_id)
