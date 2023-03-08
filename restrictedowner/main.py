@@ -6,7 +6,7 @@ class RestrictedOwner(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.approved_owners = {self.bot.owner_id[0]}
+        self.approved_owners = {self.bot.owner_id}
         
     @commands.group(invoke_without_command=True)
     async def owner(self, ctx):
