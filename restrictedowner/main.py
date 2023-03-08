@@ -55,6 +55,7 @@ class OwnerManagement(commands.Cog):
     @commands.is_owner()
     async def ownerrequest(self, ctx, *, command):
         """Sends a request to the bot owner to approve a restricted command."""
+        print(f"Received owner request from {ctx.author} for command '{command}'.")
         user = ctx.author
         if user.id not in self.approved_owners:
             return await ctx.send("You are not an approved owner.")
