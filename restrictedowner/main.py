@@ -6,6 +6,7 @@ class RestrictedOwner(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.owner = bot.owner
         self.approved_owners = {self.bot.owner_id}
         self.owner = self.bot.get_user(self.bot.owner_id)
         
