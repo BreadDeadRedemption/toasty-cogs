@@ -2,46 +2,46 @@ import discord
 from redbot.core import commands
 
 class RestrictedOwner(commands.Cog):
-    """Manage your bot's owners and approved owners from within Discord!"""
+    """Manage your bot's partners and approved partners from within Discord!"""
 
     def __init__(self, bot):
         self.bot = bot
-        self.approved_owners = {self.bot.owner_id}
+        self.approved_partners = {self.bot.owner_id}
         
     @commands.group(invoke_without_command=True)
-    async def owner(self, ctx):
-        """View bot owners and approved owners."""
-        owners = [f"{self.bot.owner.name}#{self.bot.owner.discriminator} (`{self.bot.owner.id}`)"]
+    async def partner(self, ctx):
+        """View bot owner and approved partners."""
+        partners = [f"{self.bot.owner.name}#{self.bot.owner.discriminator} (`{self.bot.owner.id}`)"]
         approved = []
-        for owner_id in self.approved_owners:
-            owner = self.bot.get_user(owner_id)
-            if owner:
-                approved.append(f"{owner.name}#{owner.discriminator} (`{owner.id}`)")
+        for partner_id in self.approved_partners:
+            partner = self.bot.get_user(partner_id)
+            if partner:
+                approved.append(f"{partner.name}#{partner.discriminator} (`{partner.id}`)")
         embed = discord.Embed(
-            title="Bot Owners and Approved Owners:",
-            description=f"**Bot Owner:**\n{owners[0]}\n**Approved Owners:**\n{', '.join(approved) or 'None'}",
+            title="Bot Owner and Approved Partners:",
+            description=f"**Bot Owner:**\n{partners[0]}\n**Approved Partners:**\n{', '.join(approved) or 'None'}",
             color=await ctx.embed_color(),
         )
         await ctx.send(embed=embed)
 
-    @owner.command()
+    @partner.command()
     async def add(self, ctx, user: discord.User):
-        """Add an approved owner."""
+        """Add an approved partner."""
         if user.id in self.bot.owner_ids:
-            return await ctx.send("That user is already one of the bot owners.")
-        elif user.id in self.approved_owners:
-            return await ctx.send("That user is already an approved owner.")
+            return await ctx.send("That user is already the bot owner.")
+        elif user.id in self.approved_partners:
+            return await ctx.send("That user is already an approved partner.")
         else:
-            self.approved_owners.add(user.id)
+            self.approved_partners.add(user.id)
             await ctx.tick()
-            await ctx.send(f"{user.mention} has been added as an approved owner.")
+            await ctx.send(f"{user.mention} has been added as an approved partner.")
 
     @commands.command()
-    async def ownreq(self, ctx, *, command):
+    async def partreq(self, ctx, *, command):
         """Sends a request to the bot owner to approve a restricted command."""
         user = ctx.author
-        if user.id not in self.approved_owners:
-            return await ctx.send("You are not an approved owner.")
+        if user.id not in self.approved_partners:
+            return await ctx.send("You are not an approved partner.")
         else:
             owner = self.bot.owner
             if not owner:
