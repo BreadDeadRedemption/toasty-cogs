@@ -1,69 +1,54 @@
-import discord
 from redbot.core import commands
+import discord
 
-class RestrictedOwner(commands.Cog):
-    """Manage your bot's partners and approved partners from within Discord!"""
-
+class Partner(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.approved_partners = {self.bot.owner_id}
-        
-    @commands.group(invoke_without_command=True)
+        self.approved_partners = {bot.owner_id}
+
+    @commands.command()
     async def partner(self, ctx):
-        """View bot owner and approved partners."""
-        partners = [f"{self.bot.owner.name}#{self.bot.owner.discriminator} (`{self.bot.owner.id}`)"]
-        approved = []
-        for partner_id in self.approved_partners:
-            partner = self.bot.get_user(partner_id)
-            if partner:
-                approved.append(f"{partner.name}#{partner.discriminator} (`{partner.id}`)")
-        embed = discord.Embed(
-            title="Bot Owner and Approved Partners:",
-            description=f"**Bot Owner:**\n{partners[0]}\n**Approved Partners:**\n{', '.join(approved) or 'None'}",
-            color=await ctx.embed_color(),
-        )
-        await ctx.send(embed=embed)
+        """Displays the bot owner's name and discriminator, as well as a list of all approved partners."""
+        owner = self.bot.get_user(self.bot.owner_id)
+        partner_list = '\n'.join([str(self.bot.get_user(partner_id)) for partner_id in self.approved_partners])
+        await ctx.send(f"Bot owner: {owner.name}#{owner.discriminator}\nApproved partners:\n{partner_list}")
+
+    @commands.group()
+    async def partner(self, ctx):
+        """Allows the bot owner to manage approved partners."""
+        pass
 
     @partner.command()
     async def add(self, ctx, user: discord.User):
-        """Add an approved partner."""
-        if user.id in self.bot.owner_ids:
-            return await ctx.send("That user is already the bot owner.")
-        elif user.id in self.approved_partners:
-            return await ctx.send("That user is already an approved partner.")
+        """Adds an approved partner."""
+        if user.id == self.bot.owner_id or user.id in self.approved_partners:
+            await ctx.send("This user is already an approved partner or the bot owner.")
         else:
             self.approved_partners.add(user.id)
-            await ctx.tick()
-            await ctx.send(f"{user.mention} has been added as an approved partner.")
+            await ctx.send(f"{user.name}#{user.discriminator} has been added as an approved partner.")
 
     @commands.command()
-    async def partreq(self, ctx, *, command):
+    async def partreq(self, ctx, command: str):
         """Sends a request to the bot owner to approve a restricted command."""
-        user = ctx.author
-        if user.id not in self.approved_partners:
-            return await ctx.send("You are not an approved partner.")
+        if ctx.author.id not in self.approved_partners:
+            await ctx.send("You are not an approved partner.")
+            return
+        
+        await ctx.send("Request sent. Waiting for bot owner's approval...")
+        owner = self.bot.get_user(self.bot.owner_id)
+        message = await owner.send(f"{ctx.author.name}#{ctx.author.discriminator} has requested permission to run the command: `{command}`. React with 👍 to approve or 👎 to deny.")
+        await message.add_reaction('👍')
+        await message.add_reaction('👎')
+
+        def check(reaction, user):
+            return user == owner and (str(reaction.emoji) == '👍' or str(reaction.emoji) == '👎')
+
+        reaction, _ = await self.bot.wait_for('reaction_add', check=check)
+
+        if str(reaction.emoji) == '👍':
+            await ctx.send("Approval granted. Running command...")
+            await ctx.invoke(self.bot.get_command(command))
         else:
-            owner = self.bot.owner
-            if not owner:
-                return await ctx.send("Bot owner not found.")
-            msg = f"{user.mention} has requested permission for `{command}`. Approve? (y/n)"
-            confirmation = await owner.send(msg)
-            await confirmation.add_reaction("👍")
-            await confirmation.add_reaction("👎")
-            try:
-                reaction, _ = await self.bot.wait_for(
-                    "reaction_add",
-                    timeout=60.0,
-                    check=lambda r, u: (
-                        r.message.id == confirmation.id
-                        and u.id == owner.id
-                        and str(r.emoji) in ["👍", "👎"]
-                    ),
-                )
-            except asyncio.TimeoutError:
-                return await ctx.send("Request timed out. Try again later.")
-            if str(reaction.emoji) == "👍":
-                await ctx.send("Request approved. Running command...")
-                await self.bot.process_commands(ctx.message)
-            else:
-                await ctx.send("Request denied. Command not run.")
+            await ctx.send("Approval denied.")
+            
+        await ctx.author.send("Your request to run the command has been processed.")
