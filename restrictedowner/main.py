@@ -1,7 +1,7 @@
 from redbot.core import commands
 import discord
 
-class Partner(commands.Cog):
+class RestrictedOwner(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.approved_partners = {bot.owner_id}
