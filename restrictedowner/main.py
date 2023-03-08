@@ -41,7 +41,6 @@ class RestrictedOwner(commands.Cog):
             await ctx.send(f"{user} has been added as an approved owner.")
 
     @commands.command(hidden=True)
-    @commands.is_owner()
     async def ownerrequest(self, ctx, *, command):
         """Sends a request to the bot owner to approve a restricted command."""
         user = ctx.author
