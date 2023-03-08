@@ -15,18 +15,20 @@ class RestrictedOwner(commands.Cog):
         """Owner management commands"""
         if ctx.invoked_subcommand is None:
             owners = ""
-            owner = self.bot.owner
-            owners += f"- {owner} (`{owner.id}`)\n"
+            for _id in self.bot.owner_ids:
+                owner = self.bot.get_user(_id)
+                owners += f"- {owner} (`{owner.id}`)\n"
             approved = ""
-            for _id in list(self.approved_owners):
+            for _id in self.approved_owners:
                 owner = self.bot.get_user(_id)
                 approved += f"- {owner} (`{owner.id}`)\n"
             embed = discord.Embed(
                 title="Bot Owners and Approved Owners:",
-                description=f"**Bot Owners:**\n{owners}\n**Approved Owners:**\n{approved}",
+                description=f"**Bot Owner:**\n{self.bot.owner_id[0]}\n**Approved Owners:**\n{approved}",
                 color=await ctx.embed_color(),
             )
             await ctx.send(embed=embed)
+
 
     @owner.command(invoke_without_command=True)
     @commands.is_owner()
