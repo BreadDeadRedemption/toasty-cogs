@@ -1,4 +1,4 @@
-from .ownermanagement import OwnerManagement
+from .main import OwnerManagement
 
 
 def setup(bot):
