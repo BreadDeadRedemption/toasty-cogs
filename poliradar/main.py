@@ -44,6 +44,3 @@ class RadarCog(commands.Cog):
         # Example usage:
         values = [economic, social, environmental, geopolitical]
         plot_radar(name, values)
-
-def setup(bot):
-    bot.add_cog(RadarCog(bot))
