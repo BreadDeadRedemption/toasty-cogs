@@ -28,12 +28,8 @@ class RadarCog(commands.Cog):
             ax = fig.add_subplot(111, polar=True)
             ax.plot(angles, values, 'o-', linewidth=2)
             ax.fill(angles, values, alpha=0.25)
-            ax.set_thetagrids(angles * 180/np.pi, labels)
-
-            # Set the number of ticks to match the number of labels
             ax.set_xticks(angles)
             ax.set_xticklabels(labels)
-
             ax.set_title(name)
             ax.set_rlim(0, max(scale))
 
@@ -45,6 +41,7 @@ class RadarCog(commands.Cog):
             # Send the plot as an attachment in Discord
             file = discord.File(buffer, filename='radar.png')
             await ctx.send(file=file)
+
 
         # Example usage:
         values = [economic, social, environmental, geopolitical]
