@@ -40,7 +40,3 @@ class RadarCog(commands.Cog):
             # Send the plot as an attachment in Discord
             file = discord.File(buffer, filename='radar.png')
             await ctx.send(file=file)
-
-        # Example usage:
-        values = [economic, social, environmental, geopolitical]
-        plot_radar(name, values)
