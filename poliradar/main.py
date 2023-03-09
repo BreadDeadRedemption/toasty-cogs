@@ -3,7 +3,7 @@ from discord.ext import commands
 import numpy as np
 import matplotlib.pyplot as plt
 from io import BytesIO
-from redbot.core import commands as rbc
+from redbot.core import commands
 
 class RadarCog(commands.Cog):
     def __init__(self, bot):
