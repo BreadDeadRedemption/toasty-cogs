@@ -9,7 +9,7 @@ class RadarCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-    @rbc.command()
+    @commands.command()
     async def radar(self, ctx, economic: int, social: int, environmental: int, geopolitical: int):
         # Define the dimensions and labels for the four axes
         labels = ['Economic', 'Social', 'Environmental', 'Geopolitical']
@@ -20,15 +20,15 @@ class RadarCog(commands.Cog):
 
         # Create a function to plot the four-axis radar chart
         async def plot_radar(ctx, values):
-            angles = np.linspace(0, 2*np.pi, dimensions, endpoint=False)
+            angles = np.linspace(0, 2*np.pi, dimensions, endpoint=False)[:-1]
             values = np.concatenate((values,[values[0]]))
-            angles = np.concatenate((angles,[angles[0]+0.1]))
+            angles = np.concatenate((angles,[angles[0]]))
 
             fig = plt.figure()
             ax = fig.add_subplot(111, polar=True)
             ax.plot(angles, values, 'o-', linewidth=2)
             ax.fill(angles, values, alpha=0.25)
-            ax.set_thetagrids(np.degrees(angles), labels)
+            ax.set_thetagrids(angles * 180/np.pi, labels)
             ax.set_rlim(0, max(scale))
 
             # Save the plot to a bytes buffer
@@ -39,6 +39,3 @@ class RadarCog(commands.Cog):
             # Send the plot as an attachment in Discord
             file = discord.File(buffer, filename='radar.png')
             await ctx.send(file=file)
-
-        # Call the function to plot the radar chart
-        await plot_radar(ctx, [economic, social, environmental, geopolitical])
