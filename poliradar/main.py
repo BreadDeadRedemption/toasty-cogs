@@ -5,14 +5,15 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 from redbot.core import commands
 
+
 class RadarCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
     @commands.command()
-    async def radar(self, ctx, economic: int, social: int, environmental: int, geopolitical: int):
+    async def fouraxisradar(self, ctx, economic: int, diplomatic: int, civil: int, societal: int):
         # Define the dimensions and labels for the four axes
-        labels = ['Economic', 'Social', 'Environmental', 'Geopolitical']
+        labels = ['Economic', 'Diplomatic', 'Civil', 'Societal']
         dimensions = len(labels)
 
         # Create an array with the scale for each axis
@@ -39,3 +40,7 @@ class RadarCog(commands.Cog):
             # Send the plot as an attachment in Discord
             file = discord.File(buffer, filename='radar.png')
             await ctx.send(file=file)
+
+        # Call the plot_radar function to create and send the chart
+        values = [economic, diplomatic, civil, societal]
+        await plot_radar(ctx, values)
