@@ -1,5 +1,6 @@
 from discord.ext import commands
 from redbot.core import commands, checks, Config
+import discord
 
 class ReplyDeleter(commands.Cog):
     def __init__(self, bot):
