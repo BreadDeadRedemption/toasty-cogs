@@ -2,47 +2,52 @@ import discord
 from redbot.core import commands
 
 class MassUnnick(commands.Cog):
-    """Mass unnick command."""
+    """Unnick all members in the server"""
 
     def __init__(self, bot):
         self.bot = bot
-        self.excluded_roles = set(self.config.get("excluded_roles", []))
+        self.excluded_roles = []  # a list of role IDs to exclude from unnicking
 
-    @commands.group()
-    async def unnickall(self, ctx):
-        """Unnick all members in the guild."""
-        pass
-
-    @unnickall.command()
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
     @commands.has_permissions(manage_nicknames=True)
-    async def start(self, ctx):
-        """Starts unnicking all members in the guild."""
-        embed = discord.Embed(title=f"Starting... 🔃", description="Initiating mass unnick", color=0x000000)
-        message = await ctx.send(embed=embed)
+    async def unnickall(self, ctx):
+        """Remove all nicknames from members in the server"""
         amount = 0
-
         for member in ctx.guild.members:
-            if self._is_excluded(member):
+            # Check if member has an excluded role
+            excluded = False
+            for role in member.roles:
+                if role.id in self.excluded_roles:
+                    excluded = True
+                    break
+            if excluded:
                 continue
             try:
                 await member.edit(nick=None)
                 amount += 1
-            except (discord.Forbidden, discord.HTTPException) as error:
-                embed = discord.Embed(title=f"Error {error}", description=f"With User: {member.name}#{member.discriminator}", color=0x000000)
-                await ctx.send(embed=embed)
-                continue
+            except discord.Forbidden:
+                pass
+        await ctx.send(f"Unnicked {amount} members.")
 
-        embed = discord.Embed(title=f"Success! ✅", description=f"Unnicked {amount} of users!", color=0x000000)
-        await message.edit(embed=embed)
-
-    @unnickall.command()
+    @unnickall.command(name="exclude")
+    @commands.guild_only()
     @commands.has_permissions(manage_nicknames=True)
-    async def exclude(self, ctx, *roles: discord.Role):
-        """Exclude specified roles from being unnicked."""
-        self.excluded_roles |= set(role.id for role in roles)
-        self.config["excluded_roles"] = list(self.excluded_roles)
-        await self.bot.db.config.update_raw("UnnickAll", self.config)
-        await ctx.send("Roles excluded successfully.")
+    async def unnickall_exclude(self, ctx, role: discord.Role):
+        """Exclude a role from being unnicked"""
+        if role.id in self.excluded_roles:
+            await ctx.send(f"{role.name} is already excluded.")
+        else:
+            self.excluded_roles.append(role.id)
+            await ctx.send(f"{role.name} added to excluded roles.")
 
-    def _is_excluded(self, member):
-        return any(role.id in self.excluded_roles for role in member.roles)
+    @unnickall.command(name="unexclude")
+    @commands.guild_only()
+    @commands.has_permissions(manage_nicknames=True)
+    async def unnickall_unexclude(self, ctx, role: discord.Role):
+        """Remove a role from the excluded list"""
+        if role.id in self.excluded_roles:
+            self.excluded_roles.remove(role.id)
+            await ctx.send(f"{role.name} removed from excluded roles.")
+        else:
+            await ctx.send(f"{role.name} is not in excluded roles.")
