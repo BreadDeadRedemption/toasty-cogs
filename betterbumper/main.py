@@ -495,7 +495,7 @@ class DisboardReminder(commands.Cog):
                 await self.config.guild(guild).lock.clear()
 
         if member_adapter is not None and isinstance(member_adapter.member, discord.Member):
-            reward_amount = 100  # Change this to the desired reward amount
+            reward_amount = 6969  # Change this to the desired reward amount
             bank = self.bot.get_cog("Bank")
             if bank:
                 await bank.deposit_credits(member_adapter.member, reward_amount)
