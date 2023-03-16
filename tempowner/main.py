@@ -75,11 +75,11 @@ class TempOwner(commands.Cog):
                 await ctx.send("No response given.")
 return False
 
-def setup(bot):
-temp_owner_management_cog = TempOwnerManagement(bot)
-async def temp_owner_or_is_owner(ctx):
-    return await temp_owner_management_cog.temp_owner_check(ctx)
+    def setup(bot):
+    temp_owner_management_cog = TempOwner(bot)
+    async def temp_owner_or_is_owner(ctx):
+        return await temp_owner_management_cog.temp_owner_check(ctx)
 
-bot.add_cog(temp_owner_management_cog)
-bot.add_check(temp_owner_or_is_owner)
+    bot.add_cog(temp_owner_management_cog)
+    bot.add_check(temp_owner_or_is_owner)
 
