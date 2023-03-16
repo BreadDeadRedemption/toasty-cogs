@@ -3,6 +3,7 @@ from discord.ext import commands
 from redbot.core import Config, checks
 from redbot.core.commands import Context
 from redbot.core.bot import Red
+from redbot.core import commands
 import random
 import string
 import asyncio
