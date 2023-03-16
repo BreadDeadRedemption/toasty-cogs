@@ -1,13 +1,11 @@
 import discord
 from redbot.core import commands
-import json
 
 class MassUnnick(commands.Cog):
     """Mass unnick command."""
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = json.loads(bot.db.config.get_raw("UnnickAll", {}))
         self.excluded_roles = set(self.config.get("excluded_roles", []))
 
     @commands.group()
