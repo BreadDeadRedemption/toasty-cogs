@@ -73,7 +73,7 @@ class TempOwner(commands.Cog):
                     await ctx.send("Request not sent.")
             except TimeoutError:
                 await ctx.send("No response given.")
-return False
+        return False
 
 def setup(bot):
     temp_owner_management_cog = TempOwner(bot)
