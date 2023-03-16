@@ -31,7 +31,7 @@ from typing import Coroutine, DefaultDict, Dict, Optional
 
 import discord
 import TagScriptEngine as tse
-from redbot.core import Config, commands
+from redbot.core import Config, commands, bank
 from redbot.core.bot import Red
 from redbot.core.utils import AsyncIter
 
