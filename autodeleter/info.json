@@ -2,6 +2,6 @@
     "version" : "1.0.0",
     "description" : "A Red Discord bot cog that automatically deletes messages that match certain criteria.",
     "name" : "AutoDeleter",
-    "tags" : ["fun"]
-    "author" : ["Bread3328"]
+    "tags" : ["fun"],
+    "author" : ["Bread3328"],
 }
