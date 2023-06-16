@@ -52,25 +52,26 @@ class pp(commands.Cog):
         """Generates a random representation for vag.
         This is 100% not accurate.
         Enter multiple users for a fun comparison!"""
-
+    
         msg = ""
         if not users:
             users = (ctx.author,)
-
+    
         for user in users:
             seed = hash(user.id + int(time.time()))
             random.seed(seed)
-
+    
             # Randomly generating each component of the representation
             width = random.choice([i for i in range(2, 11) if i % 2 == 0])
             flappage = random.choice([i for i in range(2, 11) if i % 2 == 0])
             stubble = random.randint(0, 1)
             clit = random.choice(["'", "•", "0"])
-
+    
             # Constructing the vag representation
-            vag = f"{':'*stubble}({{'*'*(flappage//2)} {' '* (width//2)}{clit}{' '* (width//2)}{'*'* (flappage//2)}}){':'*stubble}"
-
+            vag = f"{':'*stubble}({{{{'*'*(flappage//2)} {' '* (width//2)}{clit}{' '* (width//2)}{'*'* (flappage//2)}}}}){':'*stubble}"
+    
             msg += f"**{user.display_name}'s vag:**\n{vag}\n"
-
+    
         for page in pagify(msg):
             await ctx.send(page)
+    
