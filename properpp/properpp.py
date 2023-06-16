@@ -47,18 +47,13 @@ class pp(commands.Cog):
 
         for page in pagify(msg):
             await ctx.send(page)
-
     @commands.command()
     async def vag(self, ctx, *users: discord.Member):
-        """Detects user's vag attributes.
-        This is 100% accurate.
-        Enter multiple users for an accurate comparison!"""
-        
-        msg = ""
-        
-        clit_options = ["({O})", "({•})", "({'})"]
-        stubble_options = [":({}):", "({})"]
+        """Generates a random representation for vag.
+        This is 100% not accurate.
+        Enter multiple users for a fun comparison!"""
 
+        msg = ""
         if not users:
             users = (ctx.author,)
 
@@ -66,13 +61,16 @@ class pp(commands.Cog):
             seed = hash(user.id + int(time.time()))
             random.seed(seed)
 
-            clit = random.choice(clit_options)
-            stubble = random.choice(stubble_options)
-            # Generate width and flappage based on an increasing sequence
-            width = '{' + ' ' * random.randint(1, 10) + '}'
-            flappage = '(' + '{{{}}}'.format('=' * random.randint(1, 5)) + ')'
+            # Randomly generating each component of the representation
+            width = random.choice([i for i in range(2, 11) if i % 2 == 0])
+            flappage = random.choice([i for i in range(2, 11) if i % 2 == 0])
+            stubble = random.randint(0, 1)
+            clit = random.choice(["'", "•", "0"])
 
-            msg += "**{}'s attributes:**\n{}{}{}{}\n".format(user.display_name, clit, flappage, width, stubble)
+            # Constructing the vag representation
+            vag = f"{':'*stubble}({{'*'*(flappage//2)} {' '* (width//2)}{clit}{' '* (width//2)}{'*'* (flappage//2)}}){':'*stubble}"
+
+            msg += f"**{user.display_name}'s vag:**\n{vag}\n"
 
         for page in pagify(msg):
             await ctx.send(page)
