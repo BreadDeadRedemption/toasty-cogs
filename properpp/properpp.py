@@ -47,3 +47,32 @@ class pp(commands.Cog):
 
         for page in pagify(msg):
             await ctx.send(page)
+
+    @commands.command()
+    async def vag(self, ctx, *users: discord.Member):
+        """Detects user's vag attributes.
+        This is 100% accurate.
+        Enter multiple users for an accurate comparison!"""
+        
+        msg = ""
+        
+        clit_options = ["({O})", "({•})", "({'})"]
+        stubble_options = [":({}):", "({})"]
+
+        if not users:
+            users = (ctx.author,)
+
+        for user in users:
+            seed = hash(user.id + int(time.time()))
+            random.seed(seed)
+
+            clit = random.choice(clit_options)
+            stubble = random.choice(stubble_options)
+            # Generate width and flappage based on an increasing sequence
+            width = '{' + ' ' * random.randint(1, 10) + '}'
+            flappage = '(' + '{{{}}}'.format('=' * random.randint(1, 5)) + ')'
+
+            msg += "**{}'s attributes:**\n{}{}{}{}\n".format(user.display_name, clit, flappage, width, stubble)
+
+        for page in pagify(msg):
+            await ctx.send(page)
