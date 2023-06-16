@@ -68,10 +68,12 @@ class pp(commands.Cog):
             clit = random.choice(["'", "•", "0"])
     
             # Constructing the vag representation
-            vag = f"{':'*stubble}({{{{'*'*(flappage//2)} {' '* (width//2)}{clit}{' '* (width//2)}{'*'* (flappage//2)}}}}){':'*stubble}"
+            flaps = '*'*(flappage//2)
+            space = ' '*(width//2)
+    
+            vag = f"{':'*stubble}({flaps}{space}{clit}{space}{flaps}){':'*stubble}"
     
             msg += f"**{user.display_name}'s vag:**\n{vag}\n"
     
         for page in pagify(msg):
             await ctx.send(page)
-    
